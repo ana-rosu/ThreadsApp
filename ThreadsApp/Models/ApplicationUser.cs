@@ -1,6 +1,8 @@
-﻿namespace ThreadsApp.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace ThreadsApp.Models
 {
-    public class ApplicationUser
+    public class ApplicationUser : IdentityUser
     {
     }
 }
