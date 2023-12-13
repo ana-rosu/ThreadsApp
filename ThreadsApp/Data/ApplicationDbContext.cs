@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using ThreadsApp.Models;
 
 namespace ThreadsApp.Data
@@ -15,6 +16,10 @@ namespace ThreadsApp.Data
         public DbSet<Like> Likes { get; set; }
         public DbSet<Repost> Reposts { get; set; }
         public DbSet<PostRepost> PostReposts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
+        public DbSet<Follow> Follows { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -64,5 +69,5 @@ namespace ThreadsApp.Data
                         .WithMany(ab => ab.Likes)
                         .HasForeignKey(ab => ab.UserId);
             }
-        }
+    }
 }
