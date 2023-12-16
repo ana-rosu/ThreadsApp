@@ -68,6 +68,27 @@ namespace ThreadsApp.Data
                         .HasOne(ab => ab.User)
                         .WithMany(ab => ab.Likes)
                         .HasForeignKey(ab => ab.UserId);
-            }
+
+            // many-to-many relationship between users 
+            modelBuilder.Entity<Follow>()
+                        .HasKey(f => new
+                        {
+                            f.Id,
+                            f.FollowerId,
+                            f.FollowingId
+                        });
+
+            modelBuilder.Entity<Follow>()
+                        .HasOne(f => f.Follower)
+                        .WithMany(f => f.Followers)
+                        .HasForeignKey(f => f.FollowerId);
+
+            modelBuilder.Entity<Follow>()
+                        .HasOne(f => f.Following)
+                        .WithMany(f => f.Followings)
+                        .HasForeignKey(f => f.FollowingId);
+        }
+
+
     }
 }
