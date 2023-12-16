@@ -70,13 +70,6 @@ namespace ThreadsApp.Data
                         .HasForeignKey(ab => ab.UserId);
 
             // many-to-many relationship between users 
-            modelBuilder.Entity<Follow>()
-                        .HasKey(f => new
-                        {
-                            f.Id,
-                            f.FollowerId,
-                            f.FollowingId
-                        });
 
             modelBuilder.Entity<Follow>()
                         .HasOne(f => f.Follower)
