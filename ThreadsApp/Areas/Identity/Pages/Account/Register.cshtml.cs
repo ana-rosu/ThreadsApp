@@ -115,8 +115,6 @@ namespace ThreadsApp.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userManager.AddToRoleAsync(user, "User");
-
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -124,6 +122,9 @@ namespace ThreadsApp.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // If the user was created successfully then we can assign him the role "User"  
+                    await _userManager.AddToRoleAsync(user, "User");
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
