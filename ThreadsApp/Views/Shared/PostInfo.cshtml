@@ -1,0 +1,23 @@
+﻿<div class="card-body">
+    
+    <p class="card-text">@Model.Content</p>
+     
+    <div class="d-flex justify-content-between flex-row mt-5">
+
+         <div class="d-flex align-items-center">
+            <span>@Model.LikesCount</span>
+            <form method="post" action="/Likes/CreateLike/">
+                <input type="hidden" name="PostId" value="@Model.Id"/>
+                <button type="submit" class="btn">
+                    <i class="bi bi-heart"></i>
+                </button>
+            </form>
+        </div>
+      
+         <div><i class="bi bi-person"></i>@Model.User.UserName</div>
+
+         <span>@Model.FormattedDate</span>
+
+    </div>
+        
+</div>

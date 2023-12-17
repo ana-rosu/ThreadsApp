@@ -1,0 +1,30 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<h2 class="text-center">Show posts</h2>
+
+<br />
+
+@if (ViewBag.Message != null)
+{
+    <div class="@ViewBag.Alert p-3 rounded-3 text-center mb-5">@ViewBag.Message</div>
+}
+
+<br />
+
+@foreach (ThreadsApp.Models.Post post in ViewBag.Posts)
+{
+    <div class="card mx-auto" style="width: 50rem;">
+
+        @Html.Partial("PostInfo", post)
+
+        <a class="btn btn-outline-dark" href="/Posts/Show/@post.Id">Show post</a>
+
+    </div>
+
+    <br />
+    <br />
+}
+
+

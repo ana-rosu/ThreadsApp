@@ -9,9 +9,11 @@ namespace ThreadsApp.Models
 
         [Required(ErrorMessage ="The content of the post is required")]
         [StringLength(500, ErrorMessage = "The text can't be longer than 500 characters")]
-        public string Content { get; set; }
+        public string? Content { get; set; }
+        
 
         public DateTime Date { get; set; }
+        public string? FormattedDate { get; set; }
 
         public string? UserId { get; set; }
         public virtual ApplicationUser? User { get; set; }

@@ -15,7 +15,10 @@ namespace ThreadsApp.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            if (User.Identity.IsAuthenticated)
+                return Redirect("/Posts/Index");
+            else
+                return View();
         }
 
         public IActionResult Privacy()

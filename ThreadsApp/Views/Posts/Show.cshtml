@@ -1,0 +1,22 @@
+﻿@model ThreadsApp.Models.Post
+
+<br />
+
+<div class="card mx-auto" style="width: 50rem;">
+
+    @Html.Partial("PostInfo", Model)
+
+    @if (ViewBag.AfisareButoane == true || Model.UserId == ViewBag.UserCurent)
+    {
+        <div class="d-flex flex-row justify-content-between">
+
+            <a class="btn btn-outline-dark" href="/Posts/Edit/@Model.Id"><i class="bi bi-pencil"></i> Edit post</a>
+
+            <form method="post" action="/Posts/Delete/@Model.Id">
+                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i> Delete post</button>
+            </form>
+
+        </div>
+    }
+
+</div>
