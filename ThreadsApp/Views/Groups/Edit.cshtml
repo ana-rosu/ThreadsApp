@@ -1,0 +1,22 @@
+﻿@model ThreadsApp.Models.Group
+
+
+@{
+    ViewBag.Title = "Edit group";
+}
+
+<h2>@ViewBag.Title</h2>
+
+
+@using (Html.BeginForm(controllerName: "Groups", actionName: "Edit", method: FormMethod.Post,
+      routeValues: new { id = Model.Id }))
+{
+    @Html.Label("Title", "Group name")
+    <br />
+    @Html.TextBox("Title", Model.Title)
+    @Html.ValidationMessage("Title", null, new { @class = "text-danger" })
+    <br />
+    <br />
+
+    <button class="btn btn-success" type="submit">Save</button>
+}

@@ -1,0 +1,13 @@
+﻿@model ThreadsApp.Models.Group
+
+<h1>Create a new group</h1>
+@using (Html.BeginForm(actionName: "New", controllerName: "Groups", method: FormMethod.Post))
+{
+    @Html.Label("Title", "Group name");
+    <br />
+    @Html.TextBox("Title", null, new { @class = "form-control" });
+    @Html.ValidationMessage("Title", null, new { @class = "text-danger" });
+    <br />
+    <br />
+    <button class="btn btn-success" type="submit">Create</button>
+}
