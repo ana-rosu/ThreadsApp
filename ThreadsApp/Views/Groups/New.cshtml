@@ -1,13 +1,17 @@
 ﻿@model ThreadsApp.Models.Group
+@{
+    ViewBag.Title = "Create a new group";
+}
+<h1>@ViewBag.Title</h1>
 
-<h1>Create a new group</h1>
 @using (Html.BeginForm(actionName: "New", controllerName: "Groups", method: FormMethod.Post))
 {
     @Html.Label("Title", "Group name");
     <br />
-    @Html.TextBox("Title", null, new { @class = "form-control" });
+    @Html.TextBox("Title", null, new { @class = "form-control w-50"})
+    ;
     @Html.ValidationMessage("Title", null, new { @class = "text-danger" });
     <br />
     <br />
-    <button class="btn btn-success" type="submit">Create</button>
+    <button class="btn btn-dark btn-outline-light border border-dark" type="submit">Create</button>
 }
