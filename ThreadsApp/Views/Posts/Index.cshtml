@@ -8,20 +8,30 @@
 
 @if (ViewBag.Message != null)
 {
-    <div class="@ViewBag.Alert p-3 rounded-3 text-center mb-5">@ViewBag.Message</div>
+    <div class="@ViewBag.Alert p-3 rounded-3 text-center mx-auto" style="width: 50rem;">@ViewBag.Message</div>
 }
 
 <br />
 
 @foreach (ThreadsApp.Models.Post post in ViewBag.Posts)
 {
+    
+    var combinedData = new
+    {
+        Post = post,
+        AfisareButoane = ViewBag.AfisareButoane,
+        UserCurent = ViewBag.UserCurent
+    };
+
     <div class="card mx-auto" style="width: 50rem;">
 
-        @Html.Partial("PostInfo", post)
+        @Html.Partial("PostInfo", combinedData)
 
-        <a class="btn btn-outline-dark" href="/Posts/Show/@post.Id">Show post</a>
+        @Html.Partial("PostModal", combinedData)
 
-    </div>
+                
+     </div>
+        
 
     <br />
     <br />

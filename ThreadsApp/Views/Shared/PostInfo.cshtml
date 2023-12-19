@@ -1,23 +1,49 @@
-﻿<div class="card-body">
-    
-    <p class="card-text">@Model.Content</p>
+﻿@model dynamic
+<div class="card-body">
      
-    <div class="d-flex justify-content-between flex-row mt-5">
+    <div class="d-flex justify-content-between flex-row">
+       
+        <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+        <div class="d-flex align-items-center">
+        @if (Model.AfisareButoane == true || Model.Post.UserId == Model.UserCurent)
+        {
 
-         <div class="d-flex align-items-center">
-            <span>@Model.LikesCount</span>
-            <form method="post" action="/Likes/CreateLike/">
-                <input type="hidden" name="PostId" value="@Model.Id"/>
+            <a class="btn" href="/Posts/Edit/@Model.Post.Id"><i class="bi bi-pencil"></i></a>
+
+            <form method="post" action="/Posts/Delete/@Model.Post.Id">
+
+                <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
+            
+            </form>
+            
+        }
+        </div>
+    </div>
+
+    <hr class="hr" />
+    
+    <p class="card-text">@Model.Post.Content</p>
+
+    <div class="d-flex justify-content-between flex-row">
+    
+        <div class="d-flex align-items-center">
+           
+             <span>@Model.Post.LikesCount</span>
+           
+             <form method="post" action="/Likes/CreateLike/">
+              
+                <input type="hidden" name="PostId" value="@Model.Post.Id"/>
+               
                 <button type="submit" class="btn">
                     <i class="bi bi-heart"></i>
                 </button>
+            
             </form>
-        </div>
-      
-         <div><i class="bi bi-person"></i>@Model.User.UserName</div>
-
-         <span>@Model.FormattedDate</span>
-
-    </div>
         
+         </div>
+
+        <span>@Model.Post.FormattedDate</span>
+    
+    </div>
+
 </div>

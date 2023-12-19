@@ -1,0 +1,37 @@
+﻿@model dynamic
+<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#CommentsModal_@Model.Post.Id">
+    Show comments
+</button>
+<div class="modal fade" tabindex="-1" aria-labelledby="CommentsModalLabel" id="CommentsModal_@Model.Post.Id" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+    <div class="modal-header">
+        <div class="modal-title fs-6" id="CommentsModalLabel"><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div>@Model.Post.Content</div>
+        <br/>
+        <div class="d-flex align-items-center">
+
+            <span>@Model.Post.LikesCount</span>
+
+            <form method="post" action="/Likes/CreateLike/">
+
+                <input type="hidden" name="PostId" value="@Model.Post.Id" />
+
+                <button type="submit" class="btn">
+                    <i class="bi bi-heart"></i>
+                </button>
+
+            </form>
+
+        </div>
+        <hr class="hr" />
+        <!-- TODO: comments list from partial view -->
+        
+    </div>
+</div>
+    </div>
+
+</div>

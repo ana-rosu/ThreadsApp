@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Ganss.Xss;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,11 @@ namespace ThreadsApp.Controllers
         public IActionResult Index()
         {
             var posts = db.Posts.Include("Comments").Include("User").Include("PostReposts").Include("Likes")
-                                .Where(p => p.GroupId == null);
+                                .Where(p => p.GroupId == null)
+                                .OrderByDescending(p => p.Date)
+                                .ToList();
+
+            SetAccessRights();
 
             foreach (var post in posts)
             {
@@ -35,13 +40,16 @@ namespace ThreadsApp.Controllers
                 post.FormattedDate = ToRelativeDate(post.Date);
             }
 
+
             ViewBag.Posts = posts;
+
 
             if (TempData.ContainsKey("message"))
             {
                 ViewBag.Message = TempData["message"];
                 ViewBag.Alert = TempData["messageType"];
             }
+
 
             return View();
         }
@@ -106,6 +114,89 @@ namespace ThreadsApp.Controllers
             else
             {
                 return View(post);
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public ActionResult Delete(int id)
+        {
+            Post post = db.Posts.Include("Comments")
+                                .Include("Likes")
+                                .Include("PostReposts")
+                                .Where(p => p.Id == id)
+                                .First();
+
+            if (post.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
+            {
+                db.Posts.Remove(post);
+                db.SaveChanges();
+                TempData["message"] = "Post deleted successfully";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                TempData["message"] = "Post cannot be deleted because you are not the owner";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult Edit(int id)
+        {
+
+            Post post = db.Posts.Where(art => art.Id == id)
+                                .First();
+
+
+            if (post.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
+            {
+                return View(post);
+            }
+            else
+            {
+                TempData["message"] = "Post cannot be edited because you are not the owner";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult Edit(int id, Post requestPost)
+        {
+            var sanitizer = new HtmlSanitizer();
+
+            Post post = db.Posts.Find(id);
+
+            if (ModelState.IsValid)
+            {
+                if (post.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
+                {
+
+                    requestPost.Content = sanitizer.Sanitize(requestPost.Content);
+
+                    post.Content = requestPost.Content;
+
+                    post.Date = DateTime.Now;
+
+                    TempData["message"] = "Post was successfully edited";
+                    TempData["messageType"] = "alert-success";
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    TempData["message"] = "Post cannot be edited because you are not the owner";
+                    TempData["messageType"] = "alert-danger";
+                    return RedirectToAction("Index");
+                }
+            }
+            else
+            {
+                return View(requestPost);
             }
         }
 
