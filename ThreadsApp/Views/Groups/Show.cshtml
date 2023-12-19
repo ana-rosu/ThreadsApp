@@ -1,0 +1,25 @@
+﻿@model ThreadsApp.Models.Group
+
+<div class="card">
+
+    <div>
+        <h2>@Model.Title</h2>
+        <p class="mb-0">Members: @Model.MemberCount</p>
+        <p class="mt-0">Created by @Model.User?.UserName, @Model.Date.ToString("MM/dd/yyyy") </p>
+    </div>
+   
+  
+        <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
+
+            <a class="btn btn-success" href="/Groups/Edit/@Model.Id">Edit group</a>
+
+            <form method="post" action="/Groups/Delete/@Model.Id">
+
+                <button class="btn btn-danger" type="submit">Delete group</button>
+
+            </form>
+
+        </div>
+    
+    
+</div>
