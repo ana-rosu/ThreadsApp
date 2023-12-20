@@ -1,0 +1,19 @@
+﻿@model ThreadsApp.Models.Post
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h5>Create New Group Post</h5>
+    </div>
+    <div class="card-body">
+        <form asp-controller="Posts" asp-action="New" method="post">
+            <input type="hidden" asp-for="GroupId" />
+
+            <div class="form-floating mb-3">
+                <textarea asp-for="Content" class="form-control" placeholder="Write your post content"></textarea>
+                <label asp-for="Content">Post Content</label>
+            </div>
+
+            <button type="submit" class="btn btn-outline-dark">Post</button>
+        </form>
+    </div>
+</div>
