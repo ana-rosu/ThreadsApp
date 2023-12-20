@@ -49,9 +49,11 @@ namespace ThreadsApp.Controllers
         //displaying a group
         public IActionResult Show(int id)
         {
-            Group group = _db.Groups.Include("Posts").Include("User")
-                                         .Where(grp => grp.Id == id)
-                                         .First();
+            Group group = _db.Groups.Include("Posts")
+                                    .Include("Posts.User")
+                                    .Include("User")
+                                    .Where(grp => grp.Id == id)
+                                    .FirstOrDefault();
 
             if (TempData.ContainsKey("message"))
             {
@@ -94,6 +96,13 @@ namespace ThreadsApp.Controllers
             if (ModelState.IsValid)
             {
                 _db.Groups.Add(group);
+                UserGroup userGroup = new UserGroup
+                {
+                    UserId = group.UserId,
+                    GroupId = group.Id,
+                    MembershipStatus = "Admin",
+                };
+                _db.UserGroups.Add(userGroup);
                 _db.SaveChanges();
 
                 TempData["message"] = "The group was created successfully!";
@@ -312,7 +321,7 @@ namespace ThreadsApp.Controllers
         {   Group group = _db.Groups.Find(id);
             ViewBag.SeeContent = false;
 
-            if (User.IsInRole("Admin") || _db.UserGroups.Any(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == group.Id)){
+            if (User.IsInRole("Admin") || _userManager.GetUserId(User) == group.UserId || _db.UserGroups.Any(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == group.Id && ug.MembershipStatus == "Member")){
                 ViewBag.SeeContent = true;
             }
         }
