@@ -2,16 +2,21 @@
 @{
     ViewBag.PageTitle = "Create a new group";
 }
-<h1>@ViewBag.PageTitle</h1>
-
-@using (Html.BeginForm(actionName: "New", controllerName: "Groups", method: FormMethod.Post))
-{
-    @Html.Label("Title", "Group name");
-    <br />
-    @Html.TextBox("Title", null, new { @class = "form-control w-50"})
-    ;
-    @Html.ValidationMessage("Title", null, new { @class = "text-danger" });
-    <br />
-    <br />
-    <button class="btn btn-dark btn-outline-light border border-dark" type="submit">Create</button>
-}
+<h2 class="text-center mt-5">@ViewBag.PageTitle</h2>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-6 offset-3">
+        @using (Html.BeginForm(actionName: "New", controllerName: "Groups", method: FormMethod.Post))
+        {
+            @Html.Label("Title", "Group name");
+            <br />
+            @Html.TextBox("Title", null, new { @class = "form-control w-50 mt-2"})
+            ;
+            @Html.ValidationMessage("Title", null, new { @class = "text-danger" });
+            <br />
+            
+            <button class="btn btn-dark btn-outline-light border border-dark mt-2" type="submit">Create</button>
+        }
+        </div>
+    </div>
+</div>
