@@ -8,6 +8,7 @@ namespace ThreadsApp.Models
         public string? LastName {  get; set; }
         public string? Bio {  get; set; }
         public string? AccountPrivacy {  get; set; }
+        public string? ProfilePicture {  get; set; }
         public virtual ICollection<Follow>? Followers { get; set; }
         public virtual ICollection<Follow>? Followings { get; set; }
         public virtual ICollection<Like>? Likes { get; set; }
