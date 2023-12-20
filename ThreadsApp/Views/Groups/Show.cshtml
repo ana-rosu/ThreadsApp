@@ -16,8 +16,8 @@
     @if (Model.UserId == ViewBag.CurrentUser || ViewBag.IsAdmin)
     {
         <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
-
-            <a class="btn btn-success" href="/Groups/Edit/@Model.Id">Edit group</a>
+            <a class="btn btn-dark btn-outline-light border border-dark" href="/Groups/ManageRequests/@Model.Id">Manage requests</a>
+            <a class="btn btn-dark btn-outline-light border border-dark" href="/Groups/Edit/@Model.Id">Edit group</a>
 
             <form method="post" action="/Groups/Delete/@Model.Id">
 

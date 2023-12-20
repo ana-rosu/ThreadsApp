@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 using Group = ThreadsApp.Models.Group;
@@ -192,7 +193,7 @@ namespace ThreadsApp.Controllers
 
                 if (pendingRequest)
                 {
-                    TempData["message"] = "You already have a pending request to join the group. Your request is pending approval from the group owner.";
+                    TempData["message"] = "You already have a pending request to join the group.";
                     TempData["messageType"] = "alert-danger";
                     
                 }
@@ -228,6 +229,78 @@ namespace ThreadsApp.Controllers
             }
             return RedirectToAction("Show", new { id = id });
         }
+        // displaying to the owner of the group the list with all the users that requested to join
+        [Authorize(Roles="User,Admin")]
+        public IActionResult ManageRequests(int id)
+        {
+            var ownerId = _db.Groups.Where(g => g.Id == id).Select(g => g.UserId).FirstOrDefault();
+            if (ownerId == _userManager.GetUserId(User))
+            {
+                var pendingRequests = _db.UserGroups
+                                      .Where(ug => ug.GroupId == id && ug.MembershipStatus == "Pending")
+                                      .Include(ug => ug.User)
+                                      .ToList();
+                if (pendingRequests.Any())
+                {
+                    return View(pendingRequests);
+                }
+                else
+                {
+                    TempData["message"] = "There are no more pending requests!";
+                    TempData["messageType"] = "alert-danger";
+                    return RedirectToAction("Show", new { id = id });
+                }
+            }
+            else
+            {
+                TempData["message"] = "You can not manage requests for a group you are not an owner of";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new {id = id});
+            }
+        }
+        // processing the accepting a request in db
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult AcceptRequest(int userGroupId)
+        {
+            Console.WriteLine("1");
+            var userGroup = _db.UserGroups
+                            .Where(ug => ug.Id == userGroupId)
+                            .Include(ug => ug.Group)
+                            .FirstOrDefault();
+            if (userGroup != null)
+            {
+                userGroup.MembershipStatus = "Member";
+                if (userGroup.Group != null)
+                {
+                    userGroup.Group.MemberCount += 1;
+                }
+
+                _db.SaveChanges();
+
+                TempData["message"] = "Membership request accepted successfully!";
+                TempData["messageType"] = "alert-success";
+            }
+            Console.WriteLine("2");
+
+            return RedirectToAction("ManageRequests", new { id = userGroup.GroupId });
+        }
+    
+        // processing the refusing of a request in db
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult RefuseRequest(int userGroupId)
+        {
+            var userGroup = _db.UserGroups.Find(userGroupId);
+            var CurrentGroupId = userGroup.GroupId;
+            _db.UserGroups.Remove(userGroup);
+            _db.SaveChanges();
+
+            TempData["message"] = "Membership request refused!";
+            TempData["messageType"] = "alert-danger";
+
+            return RedirectToAction("ManageRequests", new { id = CurrentGroupId });
+        }
         // conditions to show edit and delete buttons 
         private void SetAccessRights()
         {
@@ -245,13 +318,3 @@ namespace ThreadsApp.Controllers
         }
     }
 }
-//var members = _db.UserGroups
-//            .Where(ug => ug.GroupId == group.Id)
-//            .Select(ug => ug.User)
-//            .ToList();
-//Console.WriteLine("Members of the group:");
-//foreach (var member in members)
-//{
-//    Console.WriteLine($"User Id: {member.Id}, UserName: {member.UserName}");
-//    // Add other properties as needed
-//}
