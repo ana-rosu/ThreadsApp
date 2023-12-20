@@ -312,7 +312,7 @@ namespace ThreadsApp.Controllers
         {   Group group = _db.Groups.Find(id);
             ViewBag.SeeContent = false;
 
-            if (User.IsInRole("Admin") || _db.UserGroups.Any(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == group.Id)){
+            if (User.IsInRole("Admin") || _userManager.GetUserId(User) == group.UserId|| _db.UserGroups.Any(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == group.Id)){
                 ViewBag.SeeContent = true;
             }
         }
