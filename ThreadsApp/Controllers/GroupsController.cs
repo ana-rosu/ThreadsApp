@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
@@ -55,6 +56,15 @@ namespace ThreadsApp.Controllers
             {
                 ViewBag.Message = TempData["message"];
                 ViewBag.Alert = TempData["messageType"];
+            }
+
+            string requestStatus = _db.UserGroups
+                                    .Where(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == id)
+                                    .Select(ug => ug.MembershipStatus)
+                                    .FirstOrDefault();
+            if (requestStatus != null)
+            {
+                ViewBag.RequestStatus = requestStatus;
             }
             SetAccessRights();
             SetViewRights(id);
@@ -140,7 +150,7 @@ namespace ThreadsApp.Controllers
             }
         }
         // processing the deletion of the group in the database
-        [Authorize(Roles = "User, Admin")]
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult Delete(int id)
         {
@@ -163,30 +173,60 @@ namespace ThreadsApp.Controllers
         }
         // processing in db the joining to a group 
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         public IActionResult JoinGroup(int id)
         {
+            Group group = _db.Groups.Find(id);
+
             var CurrentUserId = _userManager.GetUserId(User);
-            bool isMember = _db.UserGroups.Any(ug => ug.GroupId == id && ug.UserId == CurrentUserId);
+            bool isOwner = CurrentUserId == group.UserId;
 
-            if (!isMember)
+            if (isOwner)
             {
-                var userGroup = new UserGroup
-                {
-                    UserId = CurrentUserId,
-                    GroupId = id
-                };
-
-                _db.UserGroups.Add(userGroup);
-                _db.SaveChanges();
-
-                TempData["message"] = "You have successfully joined the group!";
+                TempData["message"] = "You can not join a group that you own.";
+                TempData["messageType"] = "alert-danger";
             }
             else
             {
-                TempData["message"] = "You are already a member of the group.";
-            }
+                var pendingRequest = _db.UserGroups.Any(ug => ug.GroupId == id && ug.UserId == CurrentUserId && ug.MembershipStatus == "Pending");
 
-            return RedirectToAction("Show");
+                if (pendingRequest)
+                {
+                    TempData["message"] = "You already have a pending request to join the group. Your request is pending approval from the group owner.";
+                    TempData["messageType"] = "alert-danger";
+                    
+                }
+                else
+                {
+                    bool isMember = _db.UserGroups.Any(ug => ug.GroupId == id && ug.UserId == CurrentUserId && ug.MembershipStatus == "Member");
+
+                    if (!isMember)
+                    {
+                        var userGroup = new UserGroup
+                        {
+                            UserId = CurrentUserId,
+                            GroupId = id,
+                            MembershipStatus = "Pending"
+                        };
+
+                        _db.UserGroups.Add(userGroup);
+
+                        _db.SaveChanges();
+
+                        TempData["message"] = "You have successfully requested to join the group and is pending approval by the group owner.";
+                        TempData["messageType"] = "alert-success";
+                        
+                    }
+                    else
+                    {
+                        TempData["message"] = "You are already a member of the group.";
+                        TempData["messageType"] = "alert-danger";
+                    
+                    }
+                }
+
+            }
+            return RedirectToAction("Show", new { id = id });
         }
         // conditions to show edit and delete buttons 
         private void SetAccessRights()
