@@ -63,7 +63,7 @@ namespace ThreadsApp.Controllers
                 offset = (currentPage - 1) * _perpage;
             }
 
-            var paginatedPosts = posts.Skip(offset).Take(totalItems);
+            var paginatedPosts = posts.Skip(offset).Take(_perpage);
 
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
@@ -113,11 +113,16 @@ namespace ThreadsApp.Controllers
 
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
-        public IActionResult New(Post post)
+        public IActionResult New(Post post, int? groupId)
         {
             post.Date = DateTime.Now;
 
             post.UserId = _userManager.GetUserId(User);
+
+            if (groupId != null)
+            {
+                post.GroupId = groupId;
+            }
 
             post.LikesCount = 0;
 
@@ -127,7 +132,15 @@ namespace ThreadsApp.Controllers
                 db.SaveChanges();
                 TempData["message"] = "Post was successfully added";
                 TempData["messageType"] = "alert-success";
-                return RedirectToAction("Index");
+
+                if (post.GroupId != null)
+                {
+                    return Redirect("/Groups/Show/" + groupId);
+                }
+                else
+                {
+                    return RedirectToAction("Index");
+                }
             }
 
             else
