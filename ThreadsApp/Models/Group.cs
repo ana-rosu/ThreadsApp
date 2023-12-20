@@ -12,12 +12,11 @@ namespace ThreadsApp.Models
         public string Title { get; set; }
         public int MemberCount {  get; set; }
         public DateTime Date { get; set; }
-
         //atribut pt group image
-
         public string? UserId { get; set; }
         public virtual ApplicationUser? User { get; set; }
-
-        public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<Post>? Posts { get; set; }
+        // m:m relationship between users and groups
+        public virtual ICollection<UserGroup>? UserGroups { get; set; }
     }
 }

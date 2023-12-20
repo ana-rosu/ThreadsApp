@@ -80,6 +80,19 @@ namespace ThreadsApp.Data
                         .HasOne(f => f.Following)
                         .WithMany(f => f.Followings)
                         .HasForeignKey(f => f.FollowingId);
+
+            // unique constraint in UserGroups entries of combination UserId, GroupId
+            modelBuilder.Entity<UserGroup>()
+                        .HasIndex(ug => new { ug.UserId, ug.GroupId })
+                        .IsUnique();
+
+            // when a record in the group table is deleted -> delete all related records in the UserGroups table
+            modelBuilder.Entity<UserGroup>()
+                        .HasOne(ug => ug.Group)
+                        .WithMany(g => g.UserGroups)
+                        .HasForeignKey(ug => ug.GroupId)
+                        .OnDelete(DeleteBehavior.Cascade);
+
         }
 
 
