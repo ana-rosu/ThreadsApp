@@ -38,8 +38,8 @@
 @if (ViewBag.SeeContent)
 {
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Launch demo modal
+    <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Create a new post
     </button>
 
     <!-- Modal -->
@@ -47,20 +47,43 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Write your post content</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+
+                    <!--to do: start replace with shared view-->
+                    <div class="container mt-5">
+                        <div class="row">
+                            <div>
+                                @using (Html.BeginForm(actionName: "New", controllerName: "Posts", method: FormMethod.Post))
+                                {   <input type="hidden" name="GroupId" value="@Model.Id">
+
+                                    <br />
+                                    @Html.Label("Content", "Content")
+                                    <br />
+                                    @Html.TextArea("Content", null, new { @class = "form-control" })
+                                    @Html.ValidationMessage("Content", null, new { @class = "text-danger" })
+                                    <br />
+
+
+                                    <br />
+                                    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                                    <br />
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button class="btn btn-dark" type="submit">Post</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <!--to do: end replace with shared view-->
                 </div>
             </div>
         </div>
     </div>
-    <a href="/Posts/New">Add a new post</a>
+    
     <div>
         @foreach (ThreadsApp.Models.Post post in Model.Posts)
         {
@@ -68,10 +91,11 @@
             {
                 Post = post,
                 UserCurent = ViewBag.CurrentUser,
-                AfisareButoane = true
+                IsAdmin = ViewBag.IsAdmin,
             };
             <div class="card mx-auto mb-3" style="width: 50rem;">
                 @Html.Partial("PostInfo", combinedData)
+                @Html.Partial("PostModal", combinedData) 
             </div>
         }
 
