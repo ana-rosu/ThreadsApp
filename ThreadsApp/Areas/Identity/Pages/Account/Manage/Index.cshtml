@@ -1,4 +1,7 @@
 ﻿@page
+@using ThreadsApp.Models
+@using ThreadsApp.Controllers
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model IndexModel
 @{
     ViewData["Title"] = "Profile";
@@ -11,14 +14,34 @@
     <div class="col-md-6">
         <form id="profile-form" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
                 <input asp-for="Username" class="form-control" disabled />
                 <label asp-for="Username" class="form-label"></label>
             </div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
                 <input asp-for="Input.PhoneNumber" class="form-control" />
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-2">
+                <input asp-for="Input.FirstName" class="form-control" />
+                <label asp-for="Input.FirstName" class="form-label"></label>
+            </div>
+            <div class="form-floating mb-2">
+                <input asp-for="Input.LastName" class="form-control" />
+                <label asp-for="Input.LastName" class="form-label"></label>
+            </div>
+            <div class="form-floating mb-2">
+                <input asp-for="Input.Bio" class="form-control" />
+                <label asp-for="Input.Bio" class="form-label"></label>
+            </div>
+            @* <div class="form-floating mb-2">
+                <input asp-for="Input.ProfilePicture" class="form-control" />
+                <label asp-for="Input.ProfilePicture" class="form-label"></label>
+            </div> *@
+            <div class="form-floating mb-2">
+                <select asp-for="Input.AccountPrivacy" asp-items="@ApplicationUser.PrivacyOptions" class="form-control"></select>
+                <label asp-for="Input.AccountPrivacy" class="form-label"></label>
             </div>
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </form>

@@ -19,8 +19,8 @@
     var combinedData = new
     {
         Post = post,
-        AfisareButoane = ViewBag.AfisareButoane,
-        UserCurent = ViewBag.UserCurent
+        UserCurent = ViewBag.UserCurent,
+        IsAdmin = ViewBag.IsAdmin
     };
 
     <div class="card mx-auto" style="width: 50rem;">
@@ -74,5 +74,3 @@
     </nav>
 
 </div>
-
-@Html.Partial("NewGroupPost", new ThreadsApp.Models.Post { GroupId = Model.GroupId })

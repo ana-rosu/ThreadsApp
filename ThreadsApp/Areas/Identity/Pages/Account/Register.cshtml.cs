@@ -126,6 +126,8 @@ namespace ThreadsApp.Areas.Identity.Pages.Account
                     // If the user was created successfully then we can assign him the role "User"  
                     await _userManager.AddToRoleAsync(user, "User");
 
+                    user.AccountPrivacy = "Private";
+
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));

@@ -59,18 +59,40 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+            [Display(Name = "First Name")]
+            public string FirstName { get; set; }
+            [Display(Name = "Last Name")]
+            public string LastName { get; set; }
+
+            [Display(Name = "Bio")]
+            public string Bio { get; set; }
+            [Display(Name = "Account Privacy")]
+            public string AccountPrivacy { get; set; }
+            [Display(Name = "ProfilePicture")]
+            public string ProfilePicture { get; set; }
+
         }
 
         private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var firstName = user.FirstName;
+            var lastName = user.LastName;
+            var profilePicture = user.ProfilePicture;
+            var bio = user.Bio;
+            var accountPrivacy = user.AccountPrivacy;
 
             Username = userName;
-
+            
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                FirstName = firstName,
+                LastName = lastName,
+                ProfilePicture = profilePicture,
+                Bio = bio,
+                AccountPrivacy = accountPrivacy,
             };
         }
 
@@ -111,6 +133,36 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            var firstName = user.FirstName;
+            var lastName = user.LastName;
+            var profilePicture = user.ProfilePicture;
+            var bio = user.Bio;
+            var accountPrivacy = user.AccountPrivacy;
+            if (Input.FirstName != firstName)
+            {
+                user.FirstName = Input.FirstName;
+                await _userManager.UpdateAsync(user);
+            }
+            if (Input.LastName != lastName)
+            {
+                user.LastName = Input.LastName;
+                await _userManager.UpdateAsync(user);
+            }
+            if (Input.ProfilePicture != profilePicture) 
+            {
+                user.ProfilePicture = profilePicture;
+                await _userManager.UpdateAsync(user);
+            }
+            if (Input.Bio != bio)
+            {
+                user.Bio = Input.Bio;
+                await _userManager.UpdateAsync(user);
+            }
+            if (Input.AccountPrivacy != accountPrivacy)
+            {
+                user.AccountPrivacy = Input.AccountPrivacy;
+                await _userManager.UpdateAsync(user);
+            }
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
