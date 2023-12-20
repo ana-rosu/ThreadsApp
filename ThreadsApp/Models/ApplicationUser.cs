@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ThreadsApp.Models
 {
@@ -8,6 +9,11 @@ namespace ThreadsApp.Models
         public string? LastName {  get; set; }
         public string? Bio {  get; set; }
         public string? AccountPrivacy {  get; set; }
+        public static List<SelectListItem> PrivacyOptions { get; } = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "Public", Text = "Public" },
+            new SelectListItem { Value = "Private", Text = "Private" },
+        };
         public string? ProfilePicture {  get; set; }
         public virtual ICollection<Follow>? Followers { get; set; }
         public virtual ICollection<Follow>? Followings { get; set; }

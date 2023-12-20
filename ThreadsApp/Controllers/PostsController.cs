@@ -93,13 +93,7 @@ namespace ThreadsApp.Controllers
 
         private void SetAccessRights()
         {
-            ViewBag.AfisareButoane = false;
-
-            if (User.IsInRole("Admin"))
-            {
-                ViewBag.AfisareButoane = true;
-            }
-
+            ViewBag.IsAdmin = User.IsInRole("Admin");
             ViewBag.UserCurent = _userManager.GetUserId(User);
         }
 
@@ -116,6 +110,7 @@ namespace ThreadsApp.Controllers
         public IActionResult New(Post post, int? groupId)
         {
             post.Date = DateTime.Now;
+            post.FormattedDate = ToRelativeDate(post.Date);
 
             post.UserId = _userManager.GetUserId(User);
 
@@ -203,6 +198,7 @@ namespace ThreadsApp.Controllers
 
             Post post = db.Posts.Find(id);
 
+
             if (ModelState.IsValid)
             {
                 if (post.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
@@ -213,6 +209,7 @@ namespace ThreadsApp.Controllers
                     post.Content = requestPost.Content;
 
                     post.Date = DateTime.Now;
+                    post.FormattedDate = ToRelativeDate(post.Date);
 
                     TempData["message"] = "Post was successfully edited";
                     TempData["messageType"] = "alert-success";
@@ -233,7 +230,7 @@ namespace ThreadsApp.Controllers
         }
 
         [NonAction]
-        private string ToRelativeDate(DateTime dateTime)
+        public string ToRelativeDate(DateTime dateTime)
         {
             var timeSpan = DateTime.Now - dateTime;
 

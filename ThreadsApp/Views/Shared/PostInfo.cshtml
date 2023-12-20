@@ -5,7 +5,7 @@
        
         <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
         <div class="d-flex align-items-center">
-        @if (Model.AfisareButoane == true || Model.Post.UserId == Model.UserCurent)
+        @if (Model.IsAdmin || Model.Post.UserId == Model.UserCurent)
         {
 
             <a class="btn" href="/Posts/Edit/@Model.Post.Id"><i class="bi bi-pencil"></i></a>
