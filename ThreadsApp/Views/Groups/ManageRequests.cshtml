@@ -1,0 +1,34 @@
+﻿@model List<UserGroup>
+@{
+    ViewBag.Title = "Manage Requests";
+}
+<h2>@ViewBag.Title</h2>
+@if (TempData["message"] != null)
+{
+    <div class="alert @ViewBag.Alert p-3 rounded-3 text-center mb-5">
+        @ViewBag.Message
+    </div>
+}
+@foreach (var userGroup in Model)
+{
+    <div class="d-flex justify-content-between">
+        <div>
+        @* <img src="@userGroup.User.ProfilePictureUrl" alt="Profile Picture" width="50" height="50" /> *@
+        <a href="@Url.Action("UserProfile", "User", new { id = userGroup.User.Id })">@userGroup.User.UserName</a>
+        </div>
+        <div class="d-flex gap-2">
+            <form method="post" action="@Url.Action("AcceptRequest", "Groups")" class="d-inline">
+                <input type="hidden" name="userGroupId" value="@userGroup.Id" />
+                <button class="btn btn-success" type="submit">Accept</button>
+            </form>
+            
+            <form method="post" action="@Url.Action("RefuseRequest", "Groups")" class="d-inline">
+                <input type="hidden" name="userGroupId" value="@userGroup.Id" />
+                <button class="btn btn-danger" type="submit">Refuse</button>
+            </form>
+        </div>
+        
+    </div>
+}
+
+

@@ -1,5 +1,10 @@
 ﻿@model ThreadsApp.Models.Group
-
+@if (TempData["message"] != null)
+{
+    <div class="alert @ViewBag.Alert p-3 rounded-3 text-center mb-5">
+        @ViewBag.Message
+    </div>
+}
 <div class="card">
 
     <div>
@@ -8,10 +13,11 @@
         <p class="mt-0">Created by @Model.User?.UserName, @Model.Date.ToString("MM/dd/yyyy") </p>
     </div>
    
-  
+    @if (Model.UserId == ViewBag.CurrentUser || ViewBag.IsAdmin)
+    {
         <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
-
-            <a class="btn btn-success" href="/Groups/Edit/@Model.Id">Edit group</a>
+            <a class="btn btn-dark btn-outline-light border border-dark" href="/Groups/ManageRequests/@Model.Id">Manage requests</a>
+            <a class="btn btn-dark btn-outline-light border border-dark" href="/Groups/Edit/@Model.Id">Edit group</a>
 
             <form method="post" action="/Groups/Delete/@Model.Id">
 
@@ -20,6 +26,12 @@
             </form>
 
         </div>
-    
+    }
+    @if (Model.UserId != ViewBag.CurrentUser && !ViewBag.IsAdmin)
+    {
+        <form method="post" action="/Groups/JoinGroup/@Model.Id">
+            <button class="btn btn-dark btn-outline-light border border-dark" type="submit">@(ViewBag.requestStatus ?? "Join")</button>
+    </form>
+    }
     
 </div>

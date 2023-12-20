@@ -16,6 +16,7 @@ namespace ThreadsApp.Models
         public virtual ICollection<Repost>? Reposts { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; }
         public virtual ICollection<Group>? Groups { get; set; }
+        public virtual ICollection<UserGroup>? UserGroups { get; set; }
     }
 
 }

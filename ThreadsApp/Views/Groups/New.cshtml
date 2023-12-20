@@ -1,8 +1,8 @@
 ﻿@model ThreadsApp.Models.Group
 @{
-    ViewBag.Title = "Create a new group";
+    ViewBag.PageTitle = "Create a new group";
 }
-<h1>@ViewBag.Title</h1>
+<h1>@ViewBag.PageTitle</h1>
 
 @using (Html.BeginForm(actionName: "New", controllerName: "Groups", method: FormMethod.Post))
 {
