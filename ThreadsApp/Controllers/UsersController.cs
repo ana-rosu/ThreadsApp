@@ -57,16 +57,7 @@ namespace ThreadsApp.Controllers
                 ViewBag.Posts = user.Posts;
                 ViewBag.IsAdmin = User.IsInRole("Admin");
 
-            if (user.Id == _userManager.GetUserId(User) || user.AccountPrivacy == "Public")
-            {
-                return View(user);
-            }
-            else
-            {
-                TempData["message"] = "You can't view this user's profile because it is private";
-                TempData["messageType"] = "alert-danger";
-                return Redirect("/Posts/Index");
-            }
+            return View(user);
         }
 
         public IActionResult Index()
@@ -75,7 +66,12 @@ namespace ThreadsApp.Controllers
 
             var users = db.Users;
 
-
+            foreach ( var user in users )
+            {
+                user.ProfilePicture = string.IsNullOrEmpty(user.ProfilePicture)
+                             ? "/images/profile/default.png"
+                             : user.ProfilePicture;
+            }
 
             ViewBag.Users = users;
 

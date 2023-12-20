@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<h2 class="text-center mt-5">Show Users</h2>
+
+<br />
+
+@if (ViewBag.Message != null)
+{
+    <div class="@ViewBag.Alert p-3 rounded-3 text-center mx-auto" style="width: 50rem;">@ViewBag.Message</div>
+}
+
+<br />
+
+@foreach (ThreadsApp.Models.ApplicationUser user in ViewBag.Users)
+{
+    <div class="card mx-auto" style="width: 50rem;">
+        <div class="card-body">
+            <div class="ms-3 mt-2">
+                <img src="@user.ProfilePicture" alt="Profile Picture" width="130" class="rounded mb-2 img-thumbnail" />
+            </div>
+            <div class="ms-3 mt-auto">
+                <h5 class="mt-0 mb-0">@user.UserName</h5>
+            </div>
+            <small class="ms-3 mb-3">@user.AccountPrivacy</small>
+        </div>
+        <a href="/Users/ShowProfile/@user.Id" class="btn btn-outline-dark">Show profile</a>
+    </div>
+    <br />
+}
