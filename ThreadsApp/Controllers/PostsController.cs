@@ -27,6 +27,8 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
+            int _perpage = 5;
+            
             var posts = db.Posts.Include("Comments").Include("User").Include("PostReposts").Include("Likes")
                                 .Where(p => p.GroupId == null)
                                 .OrderByDescending(p => p.Date)
@@ -49,6 +51,23 @@ namespace ThreadsApp.Controllers
                 ViewBag.Message = TempData["message"];
                 ViewBag.Alert = TempData["messageType"];
             }
+
+            int totalItems = posts.Count();
+
+            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+
+            var offset = 0;
+
+            if (!currentPage.Equals(0))
+            {
+                offset = (currentPage - 1) * _perpage;
+            }
+
+            var paginatedPosts = posts.Skip(offset).Take(totalItems);
+
+            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
+
+            ViewBag.Posts = paginatedPosts;
 
 
             return View();
@@ -147,7 +166,7 @@ namespace ThreadsApp.Controllers
         public IActionResult Edit(int id)
         {
 
-            Post post = db.Posts.Where(art => art.Id == id)
+            Post post = db.Posts.Where(p => p.Id == id)
                                 .First();
 
 
