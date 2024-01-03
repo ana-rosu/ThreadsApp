@@ -49,11 +49,16 @@ namespace ThreadsApp.Controllers
         //displaying a group
         public IActionResult Show(int id)
         {
-            Group group = _db.Groups.Include("Posts")
-                                    .Include("Posts.User")
-                                    .Include("User")
-                                    .Where(grp => grp.Id == id)
-                                    .FirstOrDefault();
+            Group group = _db.Groups
+                        .Include(g => g.Posts)
+                            .ThenInclude(p => p.User)
+                        .Include(g => g.User)
+                        .Include(g => g.Posts)
+                            .ThenInclude(p => p.Comments)
+                                .ThenInclude(c => c.User)
+                        .Where(grp => grp.Id == id)
+                        .FirstOrDefault();
+
 
             if (TempData.ContainsKey("message"))
             {
