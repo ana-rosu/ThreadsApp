@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
@@ -29,7 +30,7 @@ namespace ThreadsApp.Controllers
         {
             int _perpage = 5;
             
-            var posts = db.Posts.Include("Comments").Include("User").Include("PostReposts").Include("Likes")
+            var posts = db.Posts.Include("User").Include("Comments").Include("Comments.User").Include("PostReposts").Include("Likes")
                                 .Where(p => p.GroupId == null)
                                 .OrderByDescending(p => p.Date)
                                 .ToList();
@@ -68,7 +69,7 @@ namespace ThreadsApp.Controllers
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
             ViewBag.Posts = paginatedPosts;
-
+            ViewData["CurrentPage"] = currentPage;
 
             return View();
         }
