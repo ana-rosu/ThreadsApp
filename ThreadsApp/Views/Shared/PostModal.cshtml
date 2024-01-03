@@ -1,8 +1,4 @@
-﻿
-@using Microsoft.AspNetCore.Mvc.Rendering
-@using Microsoft.AspNetCore.Mvc.ViewFeatures
-
-@model dynamic
+﻿@model dynamic
 <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#CommentsModal_@Model.Post.Id">
     Show comments
 </button>
@@ -19,45 +15,48 @@
             <div class="modal-body">
 
                 <div>
-                    @foreach (var comm in Model.Post.Comments)
+                    @if (Model.Post != null && Model.Post.Comments != null)
                     {
-                        <div class="container">
-                            <div class="row">
-                                <strong><i class="bi bi-person"></i>@comm.User.UserName</strong>
-                                
-                                <div>
+                        @foreach (var comm in Model.Post.Comments)
+                        {
+                            <div class="container">
+                                <div class="row">
+                                    <strong><i class="bi bi-person"></i>@comm.User.UserName</strong>
 
-                                    <p class="m-0">@comm.Content</p>
-                                    <small>@comm.Date</small>
+                                    <div>
+
+                                        <p class="m-0">@comm.Content</p>
+                                        <small>@comm.Date</small>
+
+                                    </div>
 
                                 </div>
+                                @if (comm.UserId == Model.UserCurent || Model.IsAdmin)
+                                {
 
+                                    <div class="d-flex">
+
+                                        <div>
+                                            <a class="btn btn-outline-primary" href="/Comments/Edit/@comm.Id?page=@ViewData["CurrentPage"]"><i class="bi bi-pencil-square"></i>Edit</a>
+
+                                        </div>
+
+                                        <div>
+
+                                            <form method="post" action="/Comments/Delete/@comm.Id">
+
+                                                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Delete</button>
+                                                <input type="hidden" name="Page" value="@ViewData["CurrentPage"]" />
+                                            </form>
+
+                                        </div>
+
+                                    </div>
+                                }
                             </div>
-                            @if (comm.UserId == Model.UserCurent || Model.IsAdmin)
-                            {
-
-                                <div class="d-flex">
-
-                                    <div>
-                                        <a class="btn btn-outline-primary" href="/Comments/Edit/@comm.Id?page=@ViewData["CurrentPage"]"><i class="bi bi-pencil-square"></i>Edit</a>
-
-                                    </div>
-
-                                    <div>
-
-                                        <form method="post" action="/Comments/Delete/@comm.Id">
-
-                                            <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Delete</button>
-                                            <input type="hidden" name="Page" value="@ViewData["CurrentPage"]" />
-                                        </form>
-
-                                    </div>
-
-                                </div>
-                            }
-                        </div>
+                        }
                     }
-     
+
                 </div>
                 
                 @* Displaying the form to add a new comment *@

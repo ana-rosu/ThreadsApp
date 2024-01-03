@@ -25,7 +25,7 @@ namespace ThreadsApp.Controllers
         
         // adding a comment associated to a post in db
         [HttpPost]
-        public IActionResult New (Comment comm, int Page)
+        public IActionResult New (Comment comm, int? Page)
         {
             comm.Date = DateTime.Now;
             comm.UserId = _userManager.GetUserId(User);
@@ -34,8 +34,13 @@ namespace ThreadsApp.Controllers
             {
                 _db.Comments.Add(comm);
                 _db.SaveChanges();
-
-                return Redirect($"/Posts/Index?page={Page}");
+                
+                if (Page != null)
+                {
+                    return Redirect($"/Posts/Index?page={Page}");
+                }
+                Post post = _db.Posts.FirstOrDefault(p => p.Id == comm.PostId);
+                return Redirect($"/Groups/Show/{post.GroupId}");
             }
             else
             {
@@ -47,7 +52,7 @@ namespace ThreadsApp.Controllers
         // deleting a comment associated to a post from db
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
-        public IActionResult Delete(int id, int Page)
+        public IActionResult Delete(int id, int? Page)
         {
             Comment comm = _db.Comments.Find(id);
 
@@ -55,7 +60,12 @@ namespace ThreadsApp.Controllers
             {
                 _db.Comments.Remove(comm);
                 _db.SaveChanges();
-                return Redirect($"/Posts/Index?page={Page}");
+                if (Page != null)
+                {
+                    return Redirect($"/Posts/Index?page={Page}");
+                }
+                Post post = _db.Posts.FirstOrDefault(p => p.Id == comm.PostId);
+                return Redirect($"/Groups/Show/{post.GroupId}");
             }
 
             else
@@ -88,7 +98,7 @@ namespace ThreadsApp.Controllers
         // processing the form submission by saving the edits of the comment in db
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
-        public IActionResult Edit(int id, int Page, Comment requestComment)
+        public IActionResult Edit(int id, int? Page, Comment requestComment)
         {
             Comment comm = _db.Comments.Find(id);
             comm.Date = DateTime.Now;
@@ -100,7 +110,12 @@ namespace ThreadsApp.Controllers
                     comm.Content = requestComment.Content;
 
                     _db.SaveChanges();
-                    return Redirect($"/Posts/Index?page={Page}");
+                    if (Page != null)
+                    {
+                        return Redirect($"/Posts/Index?page={Page}");
+                    }
+                    Post post = _db.Posts.FirstOrDefault(p => p.Id == comm.PostId);
+                    return Redirect($"/Groups/Show/{post.GroupId}");
                 }
                 else
                 {
