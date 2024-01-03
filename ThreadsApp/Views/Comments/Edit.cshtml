@@ -1,0 +1,30 @@
+﻿@model ThreadsApp.Models.Comment
+
+@{
+    ViewBag.Title = "Edit";
+}
+
+<h2>Edit comment</h2>
+<br />
+
+
+@using (Html.BeginForm(controllerName: "Comments", actionName: "Edit",
+     method: FormMethod.Post, routeValues: new { id = Model.Id, Page = ViewBag.Page }))
+
+{
+    @Html.Label("Content", "Content:")
+
+    <br />
+
+    @Html.Editor("Content", new { @class = "form-control" })
+    <br />
+
+    @Html.ValidationMessage("Content", null, new { @class = "text-danger" })
+
+    <br />
+    <br />
+
+    <button class="btn btn-dark" type="submit">Edit</button>
+
+}
+
