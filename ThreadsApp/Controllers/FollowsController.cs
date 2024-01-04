@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Drawing;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 
@@ -108,8 +109,6 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult AcceptRequest(int followId)
         {
-            Debug.WriteLine("HELOOOOOOOOOOOOOO");
-            Debug.WriteLine(followId);
             var followRequest = _db.Follows
                                 .Include(f => f.Follower)
                                 .Include(f => f.Following)
@@ -150,6 +149,28 @@ namespace ThreadsApp.Controllers
             TempData["messageType"] = "alert-danger";
 
             return RedirectToAction("ManageRequests", new { id = followRequest.FollowingId });
+        }
+        [HttpPost]
+        public IActionResult ShowFollowers(string userId)
+        {
+            Debug.WriteLine("fucking null", userId);
+            List<ApplicationUser> followers = _db.Follows
+                                                .Where(f => f.FollowingId == userId)
+                                                .Include(f => f.Follower)
+                                                .Select(f => f.Follower)
+                                                .ToList();
+            return View(followers);
+        }
+        [HttpPost]
+        public IActionResult ShowFollowings(string userId)
+        {
+            List<ApplicationUser> followings = _db.Follows
+                                                .Where(f => f.FollowerId == userId)
+                                                .Include(f => f.Following)
+                                                .Select(f => f.Following)
+                                                .ToList();
+
+            return View(followings);
         }
     }
 }

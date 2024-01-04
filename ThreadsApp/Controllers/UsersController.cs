@@ -109,7 +109,7 @@ namespace ThreadsApp.Controllers
 
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
-            ViewBag.Users = paginatedUsers;
+            ViewBag.Users = paginatedUsers.ToList(); ;
 
 
             return View();
