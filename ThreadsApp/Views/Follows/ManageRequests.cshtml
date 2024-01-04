@@ -1,0 +1,32 @@
+﻿@model List<Follow>
+@{
+    ViewBag.Title = "Manage Requests";
+    string message = TempData["message"] as string;
+    string messageType = TempData["messageType"] as string;
+}
+<h2>@ViewBag.Title</h2>
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="@ViewBag.Alert p-3 rounded-3 text-center mx-auto" style="width: 50rem;">@message</div>
+}
+@foreach (var follow in Model)
+{
+    <div class="d-flex justify-content-between">
+        <div>
+            @* <img src="@userGroup.User.ProfilePictureUrl" alt="Profile Picture" width="50" height="50" /> *@
+            <a href="@Url.Action("ShowProfile", "Users", new { id = follow.FollowerId })">@follow.Follower.UserName</a>
+        </div>
+        <div class="d-flex gap-2">
+            <form method="post" action="@Url.Action("AcceptRequest", "Follows")" class="d-inline">
+                <input type="hidden" name="followId" value="@follow.Id" />
+                <button class="btn btn-success" type="submit">Accept</button>
+            </form>
+
+            <form method="post" action="@Url.Action("RefuseRequest", "Follows")" class="d-inline">
+                <input type="hidden" name="followId" value="@follow.Id" />
+                <button class="btn btn-danger" type="submit">Refuse</button>
+            </form>
+        </div>
+
+    </div>
+}

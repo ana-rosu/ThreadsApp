@@ -35,8 +35,10 @@ namespace ThreadsApp.Controllers
         {
             ApplicationUser user = db.Users.Include("Posts")
                                            .Include("Reposts")
+                                           .Include("Followers")
+                                           .Include("Followings")
                                            .Where(u => u.Id == id)
-                                           .First();
+                                           .FirstOrDefault();
 
             
 
@@ -52,10 +54,27 @@ namespace ThreadsApp.Controllers
                     post.FormattedDate = ToRelativeDate(post.Date);
                 }
             }
-            
+            //request status retrieved and send it through viewbag
+            string requestStatus = db.Follows
+                                   .Where(f => f.FollowerId == _userManager.GetUserId(User) && f.FollowingId == id)
+                                   .Select(f => f.Status)
+                                   .FirstOrDefault();
+            if (requestStatus != null)
+            {
+                ViewBag.RequestStatus = requestStatus;
+            }
+            int followingCount = db.Follows
+                                .Where(f => f.FollowerId == id) 
+                                .Count(f => f.Status == "Following");
+
+            int followersCount = db.Follows
+                                .Where(f => f.FollowingId == id)
+                                .Count(f => f.Status == "Following");
+            ViewBag.FollowingCount = followingCount;
+            ViewBag.FollowersCount = followersCount;
             ViewBag.CurrentUser = _userManager.GetUserId(User);
-                ViewBag.Posts = user.Posts;
-                ViewBag.IsAdmin = User.IsInRole("Admin");
+            ViewBag.Posts = user.Posts;
+            ViewBag.IsAdmin = User.IsInRole("Admin");
 
             return View(user);
         }

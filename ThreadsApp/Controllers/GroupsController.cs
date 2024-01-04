@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 using Group = ThreadsApp.Models.Group;
@@ -277,7 +275,6 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult AcceptRequest(int userGroupId)
         {
-            Console.WriteLine("1");
             var userGroup = _db.UserGroups
                             .Where(ug => ug.Id == userGroupId)
                             .Include(ug => ug.Group)
@@ -295,7 +292,6 @@ namespace ThreadsApp.Controllers
                 TempData["message"] = "Membership request accepted successfully!";
                 TempData["messageType"] = "alert-success";
             }
-            Console.WriteLine("2");
 
             return RedirectToAction("ManageRequests", new { id = userGroup.GroupId });
         }
