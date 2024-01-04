@@ -54,7 +54,7 @@ namespace ThreadsApp.Controllers
                     post.FormattedDate = ToRelativeDate(post.Date);
                 }
             }
-            //request status retrieved and send it through viewbag
+    
             string requestStatus = db.Follows
                                    .Where(f => f.FollowerId == _userManager.GetUserId(User) && f.FollowingId == id)
                                    .Select(f => f.Status)
@@ -75,7 +75,7 @@ namespace ThreadsApp.Controllers
             ViewBag.CurrentUser = _userManager.GetUserId(User);
             ViewBag.Posts = user.Posts;
             ViewBag.IsAdmin = User.IsInRole("Admin");
-
+            SetViewRights(id);
             return View(user);
         }
 
@@ -137,6 +137,18 @@ namespace ThreadsApp.Controllers
                 return timeSpan.Days > 30 ? String.Format("about {0} months ago", timeSpan.Days / 30) : "about a month ago";
 
             return timeSpan.Days > 365 ? String.Format("about {0} years ago", timeSpan.Days / 365) : "about a year ago";
+        }
+        //conditions to view the profile of an user
+        private void SetViewRights(string userId)
+        {
+            ViewBag.SeeContent = false;
+            bool isPublic = db.Users.Find(userId).AccountPrivacy == "Public";
+            string currentUserId = _userManager.GetUserId(User);
+
+            if (User.IsInRole("Admin") || isPublic || db.Follows.Any(f => f.FollowerId == currentUserId && f.FollowingId == userId && f.Status == "Following"))
+            {
+                ViewBag.SeeContent = true;
+            }
         }
     }
 }

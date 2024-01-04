@@ -27,7 +27,7 @@
                             <span class="me-3">Followers: @ViewBag.FollowersCount </span>
                             <span class="me-3">Following: @ViewBag.FollowingCount </span>
                         </div>
-                        @if (Model.Id != ViewBag.CurrentUser)
+                        @if (Model.Id != ViewBag.CurrentUser && !ViewBag.IsAdmin)
                         {
                             <div class="me-3 mb-3 align-self-end">
                                 @using (Html.BeginForm(controllerName: "Follows", actionName: "FollowUnfollowUser",
@@ -38,7 +38,7 @@
 
                             </div>
                         }
-                        @if(Model.Id == ViewBag.CurrentUser)
+                        @if (Model.Id == ViewBag.CurrentUser && !ViewBag.IsAdmin)
                         {
                             <div class="me-3 mb-3 align-self-end">
                                 <a class="btn btn-outline-dark m-auto" href="/Identity/Account/Manage">Edit Profile</a>
@@ -47,7 +47,7 @@
                     </div>
                 </div>
             </div>
-            @if (Model.Id == ViewBag.CurrentUser || ViewBag.IsAdmin) {
+            @if (ViewBag.seeContent) {
                 <div class="d-flex mb-3 w-100">
                     <div id="postRepostCollapseGroup" class="w-100">
                         <div class="row mb-3">
