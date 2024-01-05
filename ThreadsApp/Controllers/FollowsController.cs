@@ -25,47 +25,78 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult FollowUnfollowUser(string userId)
         {
-            var CurrentUserId = _userManager.GetUserId(User);
-            var pendingRequest = _db.Follows
-                                .FirstOrDefault(f => f.FollowingId == userId && f.FollowerId == CurrentUserId && f.Status == "Pending");
+            string CurrentUserId = _userManager.GetUserId(User);
+            Follow isFollower = _db.Follows.FirstOrDefault(f => f.FollowingId == userId && f.FollowerId == CurrentUserId && f.Status == "Following");
 
-            if (pendingRequest != null)
-            {   
-                _db.Follows.Remove(pendingRequest);
+            if (isFollower != null)
+            {
+                _db.Follows.Remove(isFollower);
                 _db.SaveChanges();
-                TempData["message"] = "You withdrew the follow request successfully.";
+                TempData["message"] = "You have successfully unfollowed this user.";
                 TempData["messageType"] = "alert-danger";
-
             }
             else
             {
-                var isFollower = _db.Follows.FirstOrDefault(f => f.FollowingId == userId && f.FollowerId == CurrentUserId && f.Status == "Following");
+                ApplicationUser UserBeingFollowed = _db.Users
+                                           .Include(u => u.Followers)
+                                           .FirstOrDefault(u => u.Id == userId);
 
-                if (isFollower != null)
-                {
-                    _db.Follows.Remove(isFollower);
-                    _db.SaveChanges();
-                    TempData["message"] = "You have successfully unfollowed this user.";
-                    TempData["messageType"] = "alert-danger";
-                }
-                else
+                if (UserBeingFollowed.AccountPrivacy == "Public")
                 {
                     var follow = new Follow
                     {
                         FollowerId = CurrentUserId,
                         FollowingId = userId,
-                        Status = "Pending"
+                        Status = "Following"
                     };
+                    ApplicationUser FollowerUser = _db.Users
+                                                       .Include(u => u.Followings)
+                                                       .FirstOrDefault(u => u.Id == CurrentUserId);
+
+                    FollowerUser.Followings ??= new List<Follow>();
+                    UserBeingFollowed.Followers ??= new List<Follow>();
+
+                    UserBeingFollowed.Followers.Add(follow);
+                    FollowerUser.Followings.Add(follow);
 
                     _db.Follows.Add(follow);
-                    
                     _db.SaveChanges();
-
-                    TempData["message"] = "You have successfully requested to follow this user.";
+                    TempData["message"] = "You are now following this user.";
                     TempData["messageType"] = "alert-success";
+
+                }
+                else
+                {
+                    Follow pendingRequest = _db.Follows
+                                        .FirstOrDefault(f => f.FollowingId == userId && f.FollowerId == CurrentUserId && f.Status == "Pending");
+
+                    if (pendingRequest != null)
+                    {
+                        _db.Follows.Remove(pendingRequest);
+                        _db.SaveChanges();
+                        TempData["message"] = "You withdrew the follow request successfully.";
+                        TempData["messageType"] = "alert-danger";
+
+                    }
+                    else
+                    {
+                        var follow = new Follow
+                        {
+                            FollowerId = CurrentUserId,
+                            FollowingId = userId,
+                            Status = "Pending"
+                        };
+
+                        _db.Follows.Add(follow);
+
+                        _db.SaveChanges();
+
+                        TempData["message"] = "You have successfully requested to follow this user.";
+                        TempData["messageType"] = "alert-success";
+                    }
+
                 }
             }
-
             return RedirectToAction("ShowProfile", "Users", new { id = userId });
 
         }
