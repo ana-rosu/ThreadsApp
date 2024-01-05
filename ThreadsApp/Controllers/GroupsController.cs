@@ -311,6 +311,26 @@ namespace ThreadsApp.Controllers
 
             return RedirectToAction("ManageRequests", new { id = CurrentGroupId });
         }
+
+        [HttpPost]
+        public IActionResult ShowMembers(int groupId)
+        {   
+            List<ApplicationUser> members = _db.UserGroups
+                                        .Where(u => u.GroupId == groupId)
+                                        .Include(u => u.User)
+                                        .Select(u => u.User)
+                                        .ToList();
+
+            Group group = _db.Groups
+                            .Include(g => g.User)
+                            .FirstOrDefault(g => g.Id == groupId);
+
+            ApplicationUser admin = group.User;
+
+            members.Insert(0, admin);
+            return View(members);
+        }
+
         // conditions to show edit and delete buttons 
         private void SetAccessRights()
         {
