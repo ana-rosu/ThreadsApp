@@ -35,3 +35,11 @@ body {
     background-color: black;
     color: #fff;
 }
+.nav-pills .nav-link {
+    color: black !important;
+}
+.nav-pills .nav-item.show .nav-link,
+.nav-pills .nav-link.active {
+    color: white !important;
+    background-color: black !important;
+}
