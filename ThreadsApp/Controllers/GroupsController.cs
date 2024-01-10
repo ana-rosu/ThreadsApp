@@ -162,6 +162,7 @@ namespace ThreadsApp.Controllers
             if (ModelState.IsValid)
             {
                 if (group.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin")){
+                    requestedGroup.ImagePath ??= "/images/profile/default.png";
                     if (requestedGroup.Image != null)
                     {
                         var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "groups", requestedGroup.Image.FileName);
@@ -345,7 +346,7 @@ namespace ThreadsApp.Controllers
         public IActionResult ShowMembers(int groupId)
         {   
             List<ApplicationUser> members = _db.UserGroups
-                                        .Where(u => u.GroupId == groupId)
+                                        .Where(u => u.GroupId == groupId && u.MembershipStatus == "Member")
                                         .Include(u => u.User)
                                         .Select(u => u.User)
                                         .ToList();

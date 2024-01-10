@@ -13,7 +13,7 @@
 @foreach (ThreadsApp.Models.Group group in ViewBag.Groups)
 {
         <a href="/Groups/Show/@group.Id" style="text-decoration:none; color: black;">
-            <div class="card p-3 flex flex-row justify-content-between align-items-center">
+            <div class="card p-3">
 
                 <partial name="ShowGroup" model="group" />
             </div>

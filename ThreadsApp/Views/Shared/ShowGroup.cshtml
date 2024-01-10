@@ -11,7 +11,14 @@
                     <p class="mb-0">Members: @Model.MemberCount</p>
                 </button>
             </form>
-            <p class="mt-0">Created by @Model.User?.UserName, @Model.Date.ToString("MM/dd/yyyy") </p>
+ 
+            <p class="mt-0">Created by  
+                <a href="/Users/ShowProfile/@Model.UserId" style="text-decoration:none; color: black;">
+                        @Model.User?.UserName,
+                </a>
+              @Model.Date.ToString("MM/dd/yyyy")
+            </p>
+               
         </div>
     </div>
 </div>
