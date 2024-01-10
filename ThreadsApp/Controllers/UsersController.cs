@@ -78,7 +78,7 @@ namespace ThreadsApp.Controllers
             SetViewRights(id);
             return View(user);
         }
-
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
             int _perpage = 4;
@@ -145,7 +145,7 @@ namespace ThreadsApp.Controllers
             bool isPublic = db.Users.Find(userId).AccountPrivacy == "Public";
             string currentUserId = _userManager.GetUserId(User);
 
-            if (User.IsInRole("Admin") || isPublic || db.Follows.Any(f => f.FollowerId == currentUserId && f.FollowingId == userId && f.Status == "Following"))
+            if (User.IsInRole("Admin") || isPublic || userId == _userManager.GetUserId(User) || db.Follows.Any(f => f.FollowerId == currentUserId && f.FollowingId == userId && f.Status == "Following"))
             {
                 ViewBag.SeeContent = true;
             }

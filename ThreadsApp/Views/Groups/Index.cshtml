@@ -12,19 +12,13 @@
 }
 @foreach (ThreadsApp.Models.Group group in ViewBag.Groups)
 {
-    <div class="card p-3 flex flex-row justify-content-between align-items-center">
+        <a href="/Groups/Show/@group.Id" style="text-decoration:none; color: black;">
+            <div class="card p-3 flex flex-row justify-content-between align-items-center">
 
-        <div>
-            <h3>@group.Title</h3>
-            <p class="mb-0">Members: @group.MemberCount</p>
-            <p class="mt-0">Created by @group.User.UserName, @group.Date.ToString("MM/dd/yyyy") </p>
-        </div>
+                <partial name="ShowGroup" model="group" />
+            </div>
+        </a>
 
-        <div>
-        <a class="btn btn-dark btn-outline-light border border-dark" href="/Groups/Show/@group.Id">Show Group</a>
-        </div>
-
-    </div>
     <br />
 }
 <div>
@@ -38,10 +32,13 @@
             </li>
             @for (int i = 1; i <= ViewBag.lastPage; i++)
             {
-                <li class="page-item">
+                
+
+                <li class="page-item @(i == ViewBag.currentPage ? "active" : "")">
                     <a class="page-link"
                        href="/Groups/Index?page=@i">@(i)</a>
                 </li>
+              
             }
             <li class="page-item">
                 <a class="page-link"

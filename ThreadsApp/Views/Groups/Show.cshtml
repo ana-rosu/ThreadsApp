@@ -6,17 +6,8 @@
     </div>
 }
 <div class="card p-3">
-
-    <div>
-        <h3>@Model.Title</h3>
-        <form action="/Groups/ShowMembers" method="post">
-            <button type="submit" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer;">
-                <input type="hidden" name="groupId" value="@Model.Id" />
-                <p class="mb-0">Members: @Model.MemberCount</p>
-            </button>
-        </form>
-        <p class="mt-0">Created by @Model.User?.UserName, @Model.Date.ToString("MM/dd/yyyy") </p>
-    </div>
+    
+    <partial name="ShowGroup" model="@Model" />
    
     @if (Model.UserId == ViewBag.CurrentUser || ViewBag.IsAdmin)
     {

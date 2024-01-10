@@ -31,3 +31,7 @@ body {
         border-color: #ddd;
     }
 
+.page-item.active .page-link {
+    background-color: black;
+    color: #fff;
+}

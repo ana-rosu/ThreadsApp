@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,16 @@ namespace ThreadsApp.Controllers
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public GroupsController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public GroupsController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
         {
             _db = db;
             _userManager = userManager;
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
         }
         //displaying all groups from db
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
             int _perPage = 3;
@@ -42,9 +46,11 @@ namespace ThreadsApp.Controllers
             var paginatedGroups = groups.Skip(offset).Take(_perPage);
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
             ViewBag.Groups = paginatedGroups;
+            ViewBag.currentPage = currentPage;
             return View();
         }
         //displaying a group
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Show(int id)
         {
             Group group = _db.Groups
@@ -98,6 +104,19 @@ namespace ThreadsApp.Controllers
 
             if (ModelState.IsValid)
             {
+                group.ImagePath ??= "/images/profile/default.png";
+                if (group.Image != null)
+                {
+                    // Save to wwwroot/images/groups folder
+                    var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "groups", group.Image.FileName);
+                    using (var stream = new FileStream(imagePath, FileMode.Create))
+                    {
+                        group.Image.CopyTo(stream);
+                    }
+
+                    // Set the image path in the database
+                    group.ImagePath = "/images/groups/" + group.Image.FileName;
+                }
                 _db.Groups.Add(group);
                 //UserGroup userGroup = new UserGroup
                 //{
@@ -140,11 +159,21 @@ namespace ThreadsApp.Controllers
         public IActionResult Edit(int id, Group requestedGroup)
         {
             Group group = _db.Groups.Find(id);
-
             if (ModelState.IsValid)
             {
                 if (group.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin")){
+                    if (requestedGroup.Image != null)
+                    {
+                        var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "groups", requestedGroup.Image.FileName);
+                        using (var stream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            requestedGroup.Image.CopyTo(stream);
+                        }
+                        requestedGroup.ImagePath = "/images/groups/" + requestedGroup.Image.FileName;
+                    }
                     group.Title = requestedGroup.Title;
+                    group.Image = requestedGroup.Image;
+                    group.ImagePath = requestedGroup.ImagePath;
                     TempData["message"] = "The group was successfully modified!";
                     TempData["messageType"] = "alert-success";
                     _db.SaveChanges();
