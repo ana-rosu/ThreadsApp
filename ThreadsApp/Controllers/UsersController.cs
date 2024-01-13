@@ -66,6 +66,7 @@ namespace ThreadsApp.Controllers
             ViewBag.FollowersCount = followersCount;
             ViewBag.CurrentUser = _userManager.GetUserId(User);
             ViewBag.Posts = user.Posts;
+            ViewBag.Reposts = user.Reposts;
             ViewBag.IsAdmin = User.IsInRole("Admin");
             SetViewRights(id);
             return View(user);

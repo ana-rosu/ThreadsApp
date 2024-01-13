@@ -87,13 +87,25 @@
                                 </div>
                             }
                         </div>
-                <div class="collapse" id="collapseReposts" data-bs-parent="#postRepostCollapseGroup">
-                    <!-- TODO: add User reposts -->
-                    <h5>REPOSTS</h5>
+                
+                        <div class="collapse" id="collapseReposts" data-bs-parent="#postRepostCollapseGroup">
+                            @foreach (ThreadsApp.Models.Repost repost in ViewBag.Reposts)
+                            {
+                                var combinedData = new
+                                {
+                                    Post = repost,
+                                    UserCurent = ViewBag.CurrentUser,
+                                    IsAdmin = ViewBag.IsAdmin
+                                };
+                                <div class="card mx-auto mb-3" style="width: 50rem;">
+                                    @Html.Partial("PostInfo", combinedData)
+                                </div>
+                            }
+                        </div>
+                    </div>
+    
                 </div>
+            }
         </div>
     </div>
-    }
-</div>
-</div>
 </div>
