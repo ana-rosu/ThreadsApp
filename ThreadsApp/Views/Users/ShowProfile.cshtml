@@ -43,7 +43,7 @@
                     </div>
                 </div>
             </div>
-            @if (Model.Id == ViewBag.CurrentUser || ViewBag.IsAdmin) {
+            @if (Model.Id == ViewBag.CurrentUser || ViewBag.IsAdmin || Model.AccountPrivacy == "Public") {
                 <div class="d-flex mb-3 w-100">
                     <div id="postRepostCollapseGroup" class="w-100">
                         <div class="row mb-3">

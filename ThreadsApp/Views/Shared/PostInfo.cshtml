@@ -28,16 +28,22 @@
     
         <div class="d-flex align-items-center">
            
-             <span>@Model.Post.LikesCount</span>
-           
-             <form method="post" action="/Likes/CreateLike/">
-              
-                <input type="hidden" name="PostId" value="@Model.Post.Id"/>
-               
-                <button type="submit" class="btn">
-                    <i class="bi bi-heart"></i>
-                </button>
-            
+            <span>@Model.Post.LikesCount</span>
+            <form method="post" asp-action="Like" asp-route-postId="@Model.Post.Id" asp-route-currentPage="@ViewBag.currentPage" >
+                @if (ViewData[$"UserLiked_{Model.Post.Id}"] as bool? ?? false == true)
+                {
+                    <button type="submit" class="btn">
+                        <i class="bi bi-heart-fill" style="color:red;"></i>
+                    </button>
+
+                    <input type="hidden" />
+                }
+                else
+                {
+                    <button type="submit" class="btn">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                }
             </form>
         
          </div>

@@ -25,7 +25,7 @@ namespace ThreadsApp.Controllers
         }
 
         [Authorize(Roles = "User,Admin")]
-        public IActionResult Index()
+        public IActionResult Index(int? page)
         {
             int _perpage = 5;
             
@@ -40,6 +40,7 @@ namespace ThreadsApp.Controllers
             {
                 post.LikesCount = post.Likes?.Count ?? 0;
                 post.FormattedDate = ToRelativeDate(post.Date);
+                ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));
             }
 
 
@@ -54,7 +55,7 @@ namespace ThreadsApp.Controllers
 
             int totalItems = posts.Count();
 
-            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+            var currentPage = page ?? Convert.ToInt32(HttpContext.Request.Query["page"]);
 
             var offset = 0;
 
@@ -68,8 +69,7 @@ namespace ThreadsApp.Controllers
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
             ViewBag.Posts = paginatedPosts;
-
-
+            ViewBag.currentPage = currentPage;
             return View();
         }
 
@@ -250,6 +250,33 @@ namespace ThreadsApp.Controllers
                 return timeSpan.Days > 30 ? String.Format("about {0} months ago", timeSpan.Days / 30) : "about a month ago";
 
             return timeSpan.Days > 365 ? String.Format("about {0} years ago", timeSpan.Days / 365) : "about a year ago";
+        }
+
+        [HttpPost]
+        public IActionResult Like(int postId, int currentPage)
+        {
+            Post post = db.Posts.Find(postId);
+
+            if (!db.Likes.Any(p => p.PostId == postId && p.UserId == _userManager.GetUserId(User)))
+            {
+                var like = new Like
+                {
+                    PostId = postId,
+                    UserId = _userManager.GetUserId(User),
+                };
+
+                db.Likes.Add(like);
+                db.SaveChanges();
+            }
+            else
+            {
+                Like like = db.Likes.Where(l => l.PostId == postId && l.UserId == _userManager.GetUserId(User)).First();
+
+                db.Likes.Remove(like);
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Index", new { page = currentPage});
         }
     }
 }
