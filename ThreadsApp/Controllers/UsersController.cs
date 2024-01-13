@@ -41,9 +41,10 @@ namespace ThreadsApp.Controllers
                                            .Include("Followings")
                                            .Where(u => u.Id == id)
                                            .FirstOrDefault();
-
-            user.ProfilePicture ??= "/images/profile/default.png";
-    
+            if (user.Image == null)
+            {
+                user.ProfilePicture ??= "/images/profile/default.png";
+            }
             string requestStatus = db.Follows
                                    .Where(f => f.FollowerId == _userManager.GetUserId(User) && f.FollowingId == id)
                                    .Select(f => f.Status)

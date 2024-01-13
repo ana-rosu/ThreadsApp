@@ -90,19 +90,11 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
             var lastName = user.LastName;
             var bio = user.Bio;
             var accountPrivacy = user.AccountPrivacy;
+            var profilePicture = user.ProfilePicture;
 
             Username = userName;
             user.ProfilePicture ??= "/images/profile/default.png";
-            if (Input.Image != null)
-            {
-                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profile", Input.Image.FileName);
-
-                using (var stream = new FileStream(imagePath, FileMode.Create))
-                {
-                    await Input.Image.CopyToAsync(stream);
-                }
-            }
-            var profilePicture = user.ProfilePicture;
+            
             Input = new InputModel
             {
                 PhoneNumber = phoneNumber,
@@ -166,11 +158,18 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
                 user.LastName = Input.LastName;
                 await _userManager.UpdateAsync(user);
             }
-            if (Input.ProfilePicture != profilePicture) 
+
+            if (Input.Image != null)
             {
-                user.ProfilePicture = profilePicture;
-                await _userManager.UpdateAsync(user);
+                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profile", Input.Image.FileName);
+
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await Input.Image.CopyToAsync(stream);
+                }
+                user.ProfilePicture = "/images/profile/" + Input.Image.FileName;
             }
+
             if (Input.Bio != bio)
             {
                 user.Bio = Input.Bio;
@@ -180,14 +179,6 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
             {
                 user.AccountPrivacy = Input.AccountPrivacy;
                 await _userManager.UpdateAsync(user);
-            }
-            if (Input.Image != user.Image)
-            {
-                user.Image = Input.Image;
-            }
-            if (Input.ProfilePicture != user.ProfilePicture)
-            {
-                user.ProfilePicture = Input.ProfilePicture;
             }
 
             await _userManager.UpdateAsync(user);

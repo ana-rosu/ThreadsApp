@@ -24,6 +24,7 @@ namespace ThreadsApp.Controllers
             _roleManager = roleManager;
         }
 
+        [Authorize(Roles = "User")]
         [HttpPost]
         public IActionResult New(Repost repost, int? page)
         {
@@ -89,7 +90,7 @@ namespace ThreadsApp.Controllers
 
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult Edit(int id)
         {
             Repost repost = db.Reposts.Where(r => r.Id == id)
@@ -108,7 +109,7 @@ namespace ThreadsApp.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult Edit(int id, int? page, Repost requestRepost)
         {
             Repost repost = db.Reposts.Find(id);
