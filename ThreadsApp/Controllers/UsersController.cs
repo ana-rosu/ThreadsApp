@@ -74,9 +74,30 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
-            int _perpage = 4;
 
-            var users = db.Users;
+            IQueryable<ApplicationUser> users = db.Users;
+
+            var search = "";
+
+
+            if (Convert.ToString(HttpContext.Request.Query["search"]) != null)
+            {
+                search = Convert.ToString(HttpContext.Request.Query["search"]).Trim();
+
+
+                List<string> userIds = db.Users.Where( u => u.UserName.Contains(search) 
+                                                    || u.FirstName.Contains(search)
+                                                    || u.LastName.Contains(search))
+                                               .Select(u => u.Id).ToList();
+
+                users = db.Users.Where(user => userIds.Contains(user.Id));
+
+
+            }
+
+            ViewBag.SearchString = search;
+
+            int _perpage = 4;
 
             foreach ( var user in users )
             {
