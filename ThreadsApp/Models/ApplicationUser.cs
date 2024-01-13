@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ThreadsApp.Models
 {
@@ -14,6 +15,8 @@ namespace ThreadsApp.Models
             new SelectListItem { Value = "Public", Text = "Public" },
             new SelectListItem { Value = "Private", Text = "Private" },
         };
+        [NotMapped] 
+        public IFormFile? Image { get; set; } 
         public string? ProfilePicture {  get; set; }
         public virtual ICollection<Follow>? Followers { get; set; }
         public virtual ICollection<Follow>? Followings { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -16,11 +17,13 @@ namespace ThreadsApp.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public UsersController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            IWebHostEnvironment webHostEnvironment
             )
         {
             db = context;
@@ -28,6 +31,7 @@ namespace ThreadsApp.Controllers
             _userManager = userManager;
 
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -40,12 +44,7 @@ namespace ThreadsApp.Controllers
                                            .Where(u => u.Id == id)
                                            .FirstOrDefault();
 
-            
-
-            user.ProfilePicture = string.IsNullOrEmpty(user.ProfilePicture)
-                             ? "/images/profile/default.png"
-                             : user.ProfilePicture;
-
+            user.ProfilePicture ??= "/images/profile/default.png";
     
             string requestStatus = db.Follows
                                    .Where(f => f.FollowerId == _userManager.GetUserId(User) && f.FollowingId == id)
