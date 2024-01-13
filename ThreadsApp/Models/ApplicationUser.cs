@@ -15,6 +15,8 @@ namespace ThreadsApp.Models
             new SelectListItem { Value = "Public", Text = "Public" },
             new SelectListItem { Value = "Private", Text = "Private" },
         };
+        [NotMapped] 
+        public IFormFile? Image { get; set; } 
         public string? ProfilePicture {  get; set; }
         [NotMapped] // exclude from database mapping
         public IFormFile? Image { get; set; } // property for group image
