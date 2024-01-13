@@ -4,8 +4,10 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -17,13 +19,16 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         /// <summary>
@@ -68,8 +73,12 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
             public string Bio { get; set; }
             [Display(Name = "Account Privacy")]
             public string AccountPrivacy { get; set; }
-            [Display(Name = "ProfilePicture")]
-            public string ProfilePicture { get; set; }
+            [Display(Name = "Profile Picture")]
+
+            [NotMapped]
+            public IFormFile? Image { get; set; }
+
+            public string? ProfilePicture { get; set; }
 
         }
 
@@ -79,12 +88,21 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             var firstName = user.FirstName;
             var lastName = user.LastName;
-            var profilePicture = user.ProfilePicture;
             var bio = user.Bio;
             var accountPrivacy = user.AccountPrivacy;
 
             Username = userName;
-            
+            user.ProfilePicture ??= "/images/profile/default.png";
+            if (Input.Image != null)
+            {
+                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profile", Input.Image.FileName);
+
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await Input.Image.CopyToAsync(stream);
+                }
+            }
+            var profilePicture = user.ProfilePicture;
             Input = new InputModel
             {
                 PhoneNumber = phoneNumber,
@@ -103,7 +121,7 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
-
+            Input = new InputModel();
             await LoadAsync(user);
             return Page();
         }
@@ -163,6 +181,16 @@ namespace ThreadsApp.Areas.Identity.Pages.Account.Manage
                 user.AccountPrivacy = Input.AccountPrivacy;
                 await _userManager.UpdateAsync(user);
             }
+            if (Input.Image != user.Image)
+            {
+                user.Image = Input.Image;
+            }
+            if (Input.ProfilePicture != user.ProfilePicture)
+            {
+                user.ProfilePicture = Input.ProfilePicture;
+            }
+
+            await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
