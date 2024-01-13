@@ -94,29 +94,13 @@ namespace ThreadsApp.Controllers
             return View();
         }
 
-        [Authorize(Roles = "User,Admin")]
-        public IActionResult Show(int id)
-        {
-            Post post = db.Posts.Include("Comments")
-                              .Include("User")
-                              .Include("Comments.User")
-                              .Include("Likes")
-                              .Where(p => p.Id == id)
-                              .First();
-
-
-            SetAccessRights();
-
-            return View(post);
-        }
-
         private void SetAccessRights()
         {
             ViewBag.IsAdmin = User.IsInRole("Admin");
             ViewBag.UserCurent = _userManager.GetUserId(User);
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult New()
         {
             Post post = new Post();
@@ -125,7 +109,7 @@ namespace ThreadsApp.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult New(Post post, int? groupId)
         {
             post.Date = DateTime.Now;
@@ -198,7 +182,7 @@ namespace ThreadsApp.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult Edit(int id)
         {
 
@@ -219,7 +203,7 @@ namespace ThreadsApp.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult Edit(int id, Post requestPost)
         {
 
@@ -267,7 +251,7 @@ namespace ThreadsApp.Controllers
             }
         }
 
-
+        [Authorize(Roles = "User")]
         [HttpPost]
         public IActionResult Like(int postId, int? currentPage)
         {

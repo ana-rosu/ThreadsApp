@@ -18,9 +18,6 @@ namespace ThreadsApp.Models
         [NotMapped] 
         public IFormFile? Image { get; set; } 
         public string? ProfilePicture {  get; set; }
-        [NotMapped] // exclude from database mapping
-        public IFormFile? Image { get; set; } // property for group image
-        public string? ImagePath { get; set; } // path to the uploaded image
         public virtual ICollection<Follow>? Followers { get; set; }
         public virtual ICollection<Follow>? Followings { get; set; }
         public virtual ICollection<Like>? Likes { get; set; }

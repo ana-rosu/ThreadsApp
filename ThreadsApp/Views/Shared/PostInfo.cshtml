@@ -11,9 +11,10 @@
             <div class="d-flex align-items-center">
                 @if (Model.IsAdmin || Model.Post.Post.UserId == Model.UserCurent)
                 {
-
-                    <a class="btn" href="/Posts/Edit/@Model.Post.Post.Id"><i class="bi bi-pencil"></i></a>
-
+                    @if (!Model.IsAdmin)
+                    {
+                        <a class="btn" href="/Posts/Edit/@Model.Post.Post.Id"><i class="bi bi-pencil"></i></a>
+                    }
                     <form method="post" action="/Posts/Delete/@Model.Post.Post.Id">
 
                         <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
@@ -40,9 +41,10 @@
                     <div class="d-flex align-items-center">
                         @if (Model.IsAdmin || Model.Post.Post.UserId == Model.UserCurent)
                         {
-
-                            <a class="btn" href="/Posts/Edit/@Model.Post.Post.Id"><i class="bi bi-pencil"></i></a>
-
+                            @if (!Model.IsAdmin)
+                            {
+                                <a class="btn" href="/Posts/Edit/@Model.Post.Post.Id"><i class="bi bi-pencil"></i></a>
+                            }
                             <form method="post" action="/Posts/Delete/@Model.Post.Post.Id">
 
                                 <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
@@ -134,9 +136,10 @@ else if (Model.Post is ThreadsApp.Models.Post post)
             <div class="d-flex align-items-center">
                 @if (Model.IsAdmin || Model.Post.UserId == Model.UserCurent)
                 {
-
-                    <a class="btn" href="/Posts/Edit/@Model.Post.Id"><i class="bi bi-pencil"></i></a>
-
+                    @if (!Model.IsAdmin)
+                    {
+                        <a class="btn" href="/Posts/Edit/@Model.Post.Id"><i class="bi bi-pencil"></i></a>
+                    }
                     <form method="post" action="/Posts/Delete/@Model.Post.Id">
 
                         <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
