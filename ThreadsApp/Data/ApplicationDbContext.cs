@@ -73,6 +73,16 @@ namespace ThreadsApp.Data
                         .HasForeignKey(ug => ug.GroupId)
                         .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Comment>()
+                        .HasOne(c => c.Post)
+                        .WithMany(p => p.Comments)
+                        .HasForeignKey(c => c.PostId)
+                        .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Repost>()
+                        .HasOne(r => r.Post)
+                        .WithMany(p => p.Reposts)
+                        .HasForeignKey(r => r.PostId)
+                        .OnDelete(DeleteBehavior.Cascade);
         }
 
 

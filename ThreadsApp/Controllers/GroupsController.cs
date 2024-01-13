@@ -92,7 +92,7 @@ namespace ThreadsApp.Controllers
 
         }
         // displaying the form to create a new group
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult New()
         {
             Group group = new Group();
@@ -100,7 +100,7 @@ namespace ThreadsApp.Controllers
         }
 
         // processing the form submission by adding group in database
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         [HttpPost]
         public IActionResult New(Group group)
         {
@@ -224,7 +224,7 @@ namespace ThreadsApp.Controllers
         }
         // processing in db the joining to a group 
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult JoinGroup(int id)
         {
             Group group = _db.Groups.Find(id);
