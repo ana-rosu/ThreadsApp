@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using System.Drawing;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 
@@ -17,13 +18,11 @@ namespace ThreadsApp.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public UsersController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
-            IWebHostEnvironment webHostEnvironment
+            RoleManager<IdentityRole> roleManager
             )
         {
             db = context;
@@ -31,7 +30,6 @@ namespace ThreadsApp.Controllers
             _userManager = userManager;
 
             _roleManager = roleManager;
-            _webHostEnvironment = webHostEnvironment;
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -73,8 +71,9 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
+            string currentViewerId = _userManager.GetUserId(User);
+            IQueryable<ApplicationUser> users = db.Users.Where(u => u.Id != currentViewerId);
 
-            IQueryable<ApplicationUser> users = db.Users;
 
             var search = "";
 
@@ -123,12 +122,100 @@ namespace ThreadsApp.Controllers
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
             ViewBag.Users = paginatedUsers.ToList(); ;
-
+            ViewBag.IsAdmin = User.IsInRole("Admin");
 
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult Delete(string id)
+        {
+            var user = db.Users
+                         .Include("Posts")
+                         .Include("Reposts")
+                         .Include("Comments")
+                         .Include("Groups")
+                         .Include("UserGroups")
+                         .Include("Followers")
+                         .Include("Followings")
+                         .Include("Likes")
+                         .Where(u => u.Id == id)
+                         .First();
 
+            if (user.Comments.Count > 0)
+            {
+                foreach (var comment in user.Comments)
+                {
+                    db.Comments.Remove(comment);
+                }
+            }
+
+            if (user.Posts.Count > 0)
+            {
+                foreach (var post in user.Posts)
+                {
+                    db.Posts.Remove(post);
+                }
+            }
+
+            if (user.Reposts.Count > 0)
+            {
+                foreach (var repost in user.Reposts)
+                {
+                    db.Reposts.Remove(repost);
+                }
+            }
+            if (user.Groups.Count > 0)
+            {
+                foreach (var group in user.Groups)
+                {
+                    db.Groups.Remove(group);
+                }
+            }
+            if (user.UserGroups.Count > 0)
+            {
+                foreach (var usergroup in user.UserGroups)
+                {
+                    // Check if the user is the last user in the group 
+                    var groupId = usergroup.GroupId;
+                    var remainingUsersInGroup = db.UserGroups.Count(ug => ug.GroupId == groupId);
+
+                    if (remainingUsersInGroup == 1)
+                    {
+                        Group group = db.Groups.Find(groupId);
+                        db.Groups.Remove(group);
+                    }
+                    db.UserGroups.Remove(usergroup);
+                }
+            }
+            if (user.Followers.Count > 0)
+            {
+                foreach (var follower in user.Followers)
+                {
+                    db.Follows.Remove(follower);
+                }
+            }
+            if (user.Followings.Count > 0)
+            {
+                foreach (var following in user.Followings)
+                {
+                    db.Follows.Remove(following);
+                }
+            }
+            if (user.Likes.Count > 0)
+            {
+                foreach (var like in user.Likes)
+                {
+                    db.Likes.Remove(like);
+                }
+            }
+            db.Users.Remove(user);
+
+            db.SaveChanges();
+
+            return RedirectToAction("Index");
+        }
         //conditions to view the profile of an user
         private void SetViewRights(string userId)
         {
