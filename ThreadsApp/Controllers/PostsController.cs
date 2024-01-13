@@ -1,9 +1,11 @@
 ﻿using Ganss.Xss;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 
@@ -15,14 +17,18 @@ namespace ThreadsApp.Controllers
         private readonly ApplicationDbContext db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
         public PostsController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            IWebHostEnvironment webHostEnvironment
         )
         {
             db = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -130,9 +136,21 @@ namespace ThreadsApp.Controllers
             {
                 post.GroupId = groupId;
             }
-
+            
             if (ModelState.IsValid)
             {
+                post.ImagePath ??= "/images/profile/default.png";
+                if (post.Image != null )
+                {
+                    var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts", post.Image.FileName);
+                    using (var stream = new FileStream(imagePath, FileMode.Create))
+                    {
+                        post.Image.CopyTo(stream);
+                    }
+
+                    post.ImagePath = "/images/posts/" + post.Image.FileName;
+                }
+
                 db.Posts.Add(post);
                 db.SaveChanges();
                 TempData["message"] = "Post was successfully added";
@@ -204,7 +222,6 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Edit(int id, Post requestPost)
         {
-            var sanitizer = new HtmlSanitizer();
 
             Post post = db.Posts.Find(id);
 
@@ -213,10 +230,22 @@ namespace ThreadsApp.Controllers
             {
                 if (post.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
                 {
+                    requestPost.ImagePath ??= "/images/profile/default.png";
 
-                    requestPost.Content = sanitizer.Sanitize(requestPost.Content);
+                    if (requestPost.Image != null)
+                    {
+                        var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts", requestPost.Image.FileName);
+                        using (var stream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            requestPost.Image.CopyTo(stream);
+                        }
+                        requestPost.ImagePath = "/images/posts/" + requestPost.Image.FileName;
+                    }
 
+                    
                     post.Content = requestPost.Content;
+                    post.Image = requestPost.Image;
+                    post.ImagePath = requestPost.ImagePath;
 
                     post.Date = DateTime.Now;
 

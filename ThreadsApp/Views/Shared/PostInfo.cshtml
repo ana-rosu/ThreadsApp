@@ -54,6 +54,13 @@
 
                 <hr class="hr" />
 
+                @if (Model.Post.Post.ImagePath != null)
+                {
+                    <img src="@Model.Post.Post.ImagePath" alt="Post Img" class="mb-2 img-fluid mx-auto d-block" />
+                    <br />
+                }
+
+
                 <p class="card-text">@Model.Post.Post.Content</p>
 
                 <div class="d-flex justify-content-between flex-row">
@@ -140,6 +147,13 @@ else if (Model.Post is ThreadsApp.Models.Post post)
         </div>
 
         <hr class="hr" />
+
+        @if (Model.Post.ImagePath != null)
+        {
+            <img src="@Model.Post.ImagePath" alt="Post Img" class="mb-2 img-fluid mx-auto d-block" />
+            <br />
+
+        }
 
         <p class="card-text">@Model.Post.Content</p>
 
