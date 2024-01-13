@@ -39,8 +39,6 @@ namespace ThreadsApp.Controllers
 
             foreach (var post in posts)
             {
-                post.LikesCount = post.Likes?.Count ?? 0;
-                post.FormattedDate = ToRelativeDate(post.Date);
                 ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));
             }
 
@@ -85,8 +83,6 @@ namespace ThreadsApp.Controllers
                               .Where(p => p.Id == id)
                               .First();
 
-            post.LikesCount = post.Likes?.Count ?? 0;
-            post.FormattedDate = ToRelativeDate(post.Date);
 
             SetAccessRights();
 
@@ -112,7 +108,6 @@ namespace ThreadsApp.Controllers
         public IActionResult New(Post post, int? groupId)
         {
             post.Date = DateTime.Now;
-            post.FormattedDate = ToRelativeDate(post.Date);
 
             post.UserId = _userManager.GetUserId(User);
 
@@ -120,8 +115,6 @@ namespace ThreadsApp.Controllers
             {
                 post.GroupId = groupId;
             }
-
-            post.LikesCount = 0;
 
             if (ModelState.IsValid)
             {
@@ -211,7 +204,6 @@ namespace ThreadsApp.Controllers
                     post.Content = requestPost.Content;
 
                     post.Date = DateTime.Now;
-                    post.FormattedDate = ToRelativeDate(post.Date);
 
                     TempData["message"] = "Post was successfully edited";
                     TempData["messageType"] = "alert-success";
@@ -231,33 +223,14 @@ namespace ThreadsApp.Controllers
             }
         }
 
-        [NonAction]
-        public string ToRelativeDate(DateTime dateTime)
-        {
-            var timeSpan = DateTime.Now - dateTime;
-
-            if (timeSpan <= TimeSpan.FromSeconds(60))
-                return string.Format("{0} seconds ago", timeSpan.Seconds);
-
-            if (timeSpan <= TimeSpan.FromMinutes(60))
-                return timeSpan.Minutes > 1 ? String.Format("about {0} minutes ago", timeSpan.Minutes) : "about a minute ago";
-
-            if (timeSpan <= TimeSpan.FromHours(24))
-                return timeSpan.Hours > 1 ? String.Format("about {0} hours ago", timeSpan.Hours) : "about an hour ago";
-
-            if (timeSpan <= TimeSpan.FromDays(30))
-                return timeSpan.Days > 1 ? String.Format("about {0} days ago", timeSpan.Days) : "yesterday";
-
-            if (timeSpan <= TimeSpan.FromDays(365))
-                return timeSpan.Days > 30 ? String.Format("about {0} months ago", timeSpan.Days / 30) : "about a month ago";
-
-            return timeSpan.Days > 365 ? String.Format("about {0} years ago", timeSpan.Days / 365) : "about a year ago";
-        }
 
         [HttpPost]
-        public IActionResult Like(int postId, int currentPage)
+        public IActionResult Like(int postId, int? currentPage)
         {
-            Post post = db.Posts.Find(postId);
+            Post post = db.Posts.Include("Group")
+                                .Include("Likes")
+                                .Where(p => p.Id == postId)
+                                .First();
 
             if (!db.Likes.Any(p => p.PostId == postId && p.UserId == _userManager.GetUserId(User)))
             {
@@ -278,7 +251,16 @@ namespace ThreadsApp.Controllers
                 db.SaveChanges();
             }
 
-            return RedirectToAction("Index", new { page = currentPage});
+            ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));
+
+            if (post.GroupId != null)
+            {
+                return RedirectToAction("Show", "Groups", new { id = post.GroupId });
+            }
+            else
+            {
+                return RedirectToAction("Index", new { page = currentPage });
+            }
         }
     }
 }

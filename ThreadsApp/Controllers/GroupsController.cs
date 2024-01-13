@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 using Group = ThreadsApp.Models.Group;
@@ -56,13 +57,20 @@ namespace ThreadsApp.Controllers
             Group group = _db.Groups
                         .Include(g => g.Posts)
                             .ThenInclude(p => p.User)
+                        .Include(g => g.Posts)
+                            .ThenInclude(p => p.Likes)
                         .Include(g => g.User)
                         .Include(g => g.Posts)
                             .ThenInclude(p => p.Comments)
                                 .ThenInclude(c => c.User)
                         .Where(grp => grp.Id == id)
-                        .FirstOrDefault();
+            .FirstOrDefault();
 
+
+            foreach (var post in group.Posts)
+            {
+                ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));
+            }
 
             if (TempData.ContainsKey("message"))
             {
