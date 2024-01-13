@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ThreadsApp.Models
 {
@@ -12,7 +13,9 @@ namespace ThreadsApp.Models
         public string Title { get; set; }
         public int MemberCount {  get; set; }
         public DateTime Date { get; set; }
-        //atribut pt group image
+        [NotMapped] // exclude from database mapping
+        public IFormFile? Image { get; set; } // property for group image
+        public string? ImagePath { get; set; } // path to the uploaded image
         public string? UserId { get; set; }
         public virtual ApplicationUser? User { get; set; }
         public virtual ICollection<Post>? Posts { get; set; }

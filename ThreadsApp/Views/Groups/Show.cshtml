@@ -6,12 +6,8 @@
     </div>
 }
 <div class="card p-3">
-
-    <div>
-        <h3>@Model.Title</h3>
-        <p class="mb-0">Members: @Model.MemberCount</p>
-        <p class="mt-0">Created by @Model.User?.UserName, @Model.Date.ToString("MM/dd/yyyy") </p>
-    </div>
+    
+    <partial name="ShowGroup" model="@Model" />
    
     @if (Model.UserId == ViewBag.CurrentUser || ViewBag.IsAdmin)
     {
@@ -27,6 +23,7 @@
 
         </div>
     }
+    @*If the user is not the owner of the group or the admin => show Join button*@
     @if (Model.UserId != ViewBag.CurrentUser && !ViewBag.IsAdmin)
     {
         <form method="post" action="/Groups/JoinGroup/@Model.Id">

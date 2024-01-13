@@ -1,0 +1,24 @@
+﻿@model ThreadsApp.Models.Group
+
+<div>
+    <div class="d-flex flex-row gap-3">
+        <img src="@Model.ImagePath" alt="Group Img" width="100" height="100" class="rounded-circle mb-2 img-thumbnail d-block" />
+        <div>
+            <h3>@Model.Title</h3>
+            <form action="/Groups/ShowMembers" method="post">
+                <button type="submit" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer;">
+                    <input type="hidden" name="groupId" value="@Model.Id" />
+                    <p class="mb-0">Members: @Model.MemberCount</p>
+                </button>
+            </form>
+ 
+            <p class="mt-0">Created by  
+                <a href="/Users/ShowProfile/@Model.UserId" style="text-decoration:none; color: black;">
+                        @Model.User?.UserName,
+                </a>
+              @Model.Date.ToString("MM/dd/yyyy")
+            </p>
+               
+        </div>
+    </div>
+</div>

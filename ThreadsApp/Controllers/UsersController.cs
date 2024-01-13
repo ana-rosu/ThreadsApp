@@ -35,8 +35,10 @@ namespace ThreadsApp.Controllers
         {
             ApplicationUser user = db.Users.Include("Posts")
                                            .Include("Reposts")
+                                           .Include("Followers")
+                                           .Include("Followings")
                                            .Where(u => u.Id == id)
-                                           .First();
+                                           .FirstOrDefault();
 
             
 
@@ -52,14 +54,31 @@ namespace ThreadsApp.Controllers
                     post.FormattedDate = ToRelativeDate(post.Date);
                 }
             }
-            
-            ViewBag.CurrentUser = _userManager.GetUserId(User);
-                ViewBag.Posts = user.Posts;
-                ViewBag.IsAdmin = User.IsInRole("Admin");
+    
+            string requestStatus = db.Follows
+                                   .Where(f => f.FollowerId == _userManager.GetUserId(User) && f.FollowingId == id)
+                                   .Select(f => f.Status)
+                                   .FirstOrDefault();
+            if (requestStatus != null)
+            {
+                ViewBag.RequestStatus = requestStatus;
+            }
+            int followingCount = db.Follows
+                                .Where(f => f.FollowerId == id) 
+                                .Count(f => f.Status == "Following");
 
+            int followersCount = db.Follows
+                                .Where(f => f.FollowingId == id)
+                                .Count(f => f.Status == "Following");
+            ViewBag.FollowingCount = followingCount;
+            ViewBag.FollowersCount = followersCount;
+            ViewBag.CurrentUser = _userManager.GetUserId(User);
+            ViewBag.Posts = user.Posts;
+            ViewBag.IsAdmin = User.IsInRole("Admin");
+            SetViewRights(id);
             return View(user);
         }
-
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
             int _perpage = 4;
@@ -90,7 +109,7 @@ namespace ThreadsApp.Controllers
 
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
-            ViewBag.Users = paginatedUsers;
+            ViewBag.Users = paginatedUsers.ToList(); ;
 
 
             return View();
@@ -118,6 +137,18 @@ namespace ThreadsApp.Controllers
                 return timeSpan.Days > 30 ? String.Format("about {0} months ago", timeSpan.Days / 30) : "about a month ago";
 
             return timeSpan.Days > 365 ? String.Format("about {0} years ago", timeSpan.Days / 365) : "about a year ago";
+        }
+        //conditions to view the profile of an user
+        private void SetViewRights(string userId)
+        {
+            ViewBag.SeeContent = false;
+            bool isPublic = db.Users.Find(userId).AccountPrivacy == "Public";
+            string currentUserId = _userManager.GetUserId(User);
+
+            if (User.IsInRole("Admin") || isPublic || userId == _userManager.GetUserId(User) || db.Follows.Any(f => f.FollowerId == currentUserId && f.FollowingId == userId && f.Status == "Following"))
+            {
+                ViewBag.SeeContent = true;
+            }
         }
     }
 }

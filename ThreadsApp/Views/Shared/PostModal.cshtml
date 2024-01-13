@@ -2,43 +2,89 @@
 <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#CommentsModal_@Model.Post.Id">
     Show comments
 </button>
+
 <div class="modal fade" tabindex="-1" aria-labelledby="CommentsModalLabel" id="CommentsModal_@Model.Post.Id" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-    <div class="modal-header">
-        <div class="modal-title fs-6" id="CommentsModalLabel"><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-    <div class="modal-body">
-        <div>@Model.Post.Content</div>
-        <br/>
-        <div class="d-flex align-items-center">
 
-            <span>@Model.Post.LikesCount</span>
+            <div class="modal-header">
+                <div class="modal-title fs-6" id="CommentsModalLabel"><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-            <form method="post" asp-action="Like" asp-route-postId="@Model.Post.Id" asp-route-currentPage="@ViewBag.currentPage" >
-                @if (ViewData[$"UserLiked_{Model.Post.Id}"] as bool? ?? false == true)
-                {
-                    <button type="submit" class="btn">
-                        <i class="bi bi-heart-fill" style="color:red;"></i>
-                    </button>
+            <div class="modal-body">
 
-                    <input type="hidden" />
-                }
-                else
-                {
-                    <button type="submit" class="btn">
-                        <i class="bi bi-heart"></i>
-                    </button>
-                }
-            </form>
+                <div>
+                    @if (Model.Post != null && Model.Post.Comments != null)
+                    {
+                        @foreach (var comm in Model.Post.Comments)
+                        {
+                            <div class="container">
+                                <div class="row">
+                                    <a href="/Users/ShowProfile/@comm.UserId" style="text-decoration:none; color: black;">
+                                        <strong><i class="bi bi-person"></i>@comm.User.UserName</strong>
+                                    </a>
+                                    <div>
 
+                                        <p class="m-0">@comm.Content</p>
+                                        <small>@comm.Date</small>
+
+                                    </div>
+
+                                </div>
+                                @if (comm.UserId == Model.UserCurent || Model.IsAdmin)
+                                {
+
+                                    <div class="d-flex">
+
+                                        <div>
+                                            <a class="btn btn-outline-primary" href="/Comments/Edit/@comm.Id?page=@ViewData["CurrentPage"]"><i class="bi bi-pencil-square"></i>Edit</a>
+
+                                        </div>
+
+                                        <div>
+
+                                            <form method="post" action="/Comments/Delete/@comm.Id">
+
+                                                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Delete</button>
+                                                <input type="hidden" name="Page" value="@ViewData["CurrentPage"]" />
+                                            </form>
+
+                                        </div>
+
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+
+                </div>
+                
+                @* Displaying the form to add a new comment *@
+
+                <div class="container">
+                    <div class="row">
+                        <div class="card">
+                            <form method="post" action="/Comments/New">
+                     
+                                <input type="hidden" name="PostId" value="@Model.Post.Id" />
+                                <input type="hidden" name="Page" value="@ViewData["CurrentPage"]" />
+                                <div class="card-body">
+                                    <label>Content:</label>
+                                    <br />
+                                    <textarea class="form-control" name="Content"></textarea>
+                                    @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
+                                    <br /><br />
+                                    <button class="btn btn-outline-dark" type="submit" id="postButton">Post</button>
+                                </div>
+                            
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                @* end *@
+            </div>
         </div>
-        <hr class="hr" />
-        <!-- TODO: comments list from partial view -->
-        
     </div>
-</div>
-    </div>
-
 </div>

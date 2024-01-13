@@ -73,13 +73,16 @@ namespace ThreadsApp.Data
 
             modelBuilder.Entity<Follow>()
                         .HasOne(f => f.Follower)
-                        .WithMany(f => f.Followers)
-                        .HasForeignKey(f => f.FollowerId);
-
+                        .WithMany(u => u.Followings)
+                        .HasForeignKey(f => f.FollowerId)
+                        .OnDelete(DeleteBehavior.NoAction);
+           
             modelBuilder.Entity<Follow>()
                         .HasOne(f => f.Following)
-                        .WithMany(f => f.Followings)
-                        .HasForeignKey(f => f.FollowingId);
+                        .WithMany(u => u.Followers)
+                        .HasForeignKey(f => f.FollowingId)
+                        .OnDelete(DeleteBehavior.NoAction); ;
+            
 
             // unique constraint in UserGroups entries of combination UserId, GroupId
             modelBuilder.Entity<UserGroup>()

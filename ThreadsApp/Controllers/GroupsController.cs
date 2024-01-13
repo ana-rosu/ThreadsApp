@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using ThreadsApp.Data;
 using ThreadsApp.Models;
 using Group = ThreadsApp.Models.Group;
@@ -15,13 +14,16 @@ namespace ThreadsApp.Controllers
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public GroupsController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public GroupsController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
         {
             _db = db;
             _userManager = userManager;
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
         }
         //displaying all groups from db
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
             int _perPage = 3;
@@ -44,16 +46,23 @@ namespace ThreadsApp.Controllers
             var paginatedGroups = groups.Skip(offset).Take(_perPage);
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
             ViewBag.Groups = paginatedGroups;
+            ViewBag.currentPage = currentPage;
             return View();
         }
         //displaying a group
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Show(int id)
         {
-            Group group = _db.Groups.Include("Posts")
-                                    .Include("Posts.User")
-                                    .Include("User")
-                                    .Where(grp => grp.Id == id)
-                                    .FirstOrDefault();
+            Group group = _db.Groups
+                        .Include(g => g.Posts)
+                            .ThenInclude(p => p.User)
+                        .Include(g => g.User)
+                        .Include(g => g.Posts)
+                            .ThenInclude(p => p.Comments)
+                                .ThenInclude(c => c.User)
+                        .Where(grp => grp.Id == id)
+                        .FirstOrDefault();
+
 
             if (TempData.ContainsKey("message"))
             {
@@ -95,14 +104,27 @@ namespace ThreadsApp.Controllers
 
             if (ModelState.IsValid)
             {
-                _db.Groups.Add(group);
-                UserGroup userGroup = new UserGroup
+                group.ImagePath ??= "/images/profile/default.png";
+                if (group.Image != null)
                 {
-                    UserId = group.UserId,
-                    GroupId = group.Id,
-                    MembershipStatus = "Admin",
-                };
-                _db.UserGroups.Add(userGroup);
+                    // Save to wwwroot/images/groups folder
+                    var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "groups", group.Image.FileName);
+                    using (var stream = new FileStream(imagePath, FileMode.Create))
+                    {
+                        group.Image.CopyTo(stream);
+                    }
+
+                    // Set the image path in the database
+                    group.ImagePath = "/images/groups/" + group.Image.FileName;
+                }
+                _db.Groups.Add(group);
+                //UserGroup userGroup = new UserGroup
+                //{
+                //    UserId = group.UserId,
+                //    GroupId = group.Id,
+                //    MembershipStatus = "Admin",
+                //};
+                //_db.UserGroups.Add(userGroup);
                 _db.SaveChanges();
 
                 TempData["message"] = "The group was created successfully!";
@@ -137,11 +159,22 @@ namespace ThreadsApp.Controllers
         public IActionResult Edit(int id, Group requestedGroup)
         {
             Group group = _db.Groups.Find(id);
-
             if (ModelState.IsValid)
             {
                 if (group.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin")){
+                    requestedGroup.ImagePath ??= "/images/profile/default.png";
+                    if (requestedGroup.Image != null)
+                    {
+                        var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "groups", requestedGroup.Image.FileName);
+                        using (var stream = new FileStream(imagePath, FileMode.Create))
+                        {
+                            requestedGroup.Image.CopyTo(stream);
+                        }
+                        requestedGroup.ImagePath = "/images/groups/" + requestedGroup.Image.FileName;
+                    }
                     group.Title = requestedGroup.Title;
+                    group.Image = requestedGroup.Image;
+                    group.ImagePath = requestedGroup.ImagePath;
                     TempData["message"] = "The group was successfully modified!";
                     TempData["messageType"] = "alert-success";
                     _db.SaveChanges();
@@ -272,7 +305,6 @@ namespace ThreadsApp.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult AcceptRequest(int userGroupId)
         {
-            Console.WriteLine("1");
             var userGroup = _db.UserGroups
                             .Where(ug => ug.Id == userGroupId)
                             .Include(ug => ug.Group)
@@ -290,7 +322,6 @@ namespace ThreadsApp.Controllers
                 TempData["message"] = "Membership request accepted successfully!";
                 TempData["messageType"] = "alert-success";
             }
-            Console.WriteLine("2");
 
             return RedirectToAction("ManageRequests", new { id = userGroup.GroupId });
         }
@@ -310,6 +341,26 @@ namespace ThreadsApp.Controllers
 
             return RedirectToAction("ManageRequests", new { id = CurrentGroupId });
         }
+
+        [HttpPost]
+        public IActionResult ShowMembers(int groupId)
+        {   
+            List<ApplicationUser> members = _db.UserGroups
+                                        .Where(u => u.GroupId == groupId && u.MembershipStatus == "Member")
+                                        .Include(u => u.User)
+                                        .Select(u => u.User)
+                                        .ToList();
+
+            Group group = _db.Groups
+                            .Include(g => g.User)
+                            .FirstOrDefault(g => g.Id == groupId);
+
+            ApplicationUser admin = group.User;
+
+            members.Insert(0, admin);
+            return View(members);
+        }
+
         // conditions to show edit and delete buttons 
         private void SetAccessRights()
         {
@@ -321,7 +372,7 @@ namespace ThreadsApp.Controllers
         {   Group group = _db.Groups.Find(id);
             ViewBag.SeeContent = false;
 
-            if (User.IsInRole("Admin") || _userManager.GetUserId(User) == group.UserId || _db.UserGroups.Any(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == group.Id && ug.MembershipStatus == "Member")){
+            if (User.IsInRole("Admin") || _userManager.GetUserId(User) == group?.UserId || _db.UserGroups.Any(ug => ug.UserId == _userManager.GetUserId(User) && ug.GroupId == group.Id && ug.MembershipStatus == "Member")){
                 ViewBag.SeeContent = true;
             }
         }
