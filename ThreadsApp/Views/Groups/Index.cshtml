@@ -10,6 +10,11 @@
         @ViewBag.Message
     </div>
 }
+<div class="text-center">
+    <a class="btn btn-outline-dark mx-auto" asp-area="" asp-controller="Groups" asp-action="New">+ New Group</a>
+</div>
+<br />
+<br />
 @foreach (ThreadsApp.Models.Group group in ViewBag.Groups)
 {
         <a href="/Groups/Show/@group.Id" style="text-decoration:none; color: black;">
