@@ -73,7 +73,7 @@ namespace ThreadsApp.Controllers
         public IActionResult Index()
         {
             string currentViewerId = _userManager.GetUserId(User);
-            IQueryable<ApplicationUser> users = db.Users.Where(u => u.Id != currentViewerId);
+            IQueryable<ApplicationUser> users = db.Users.Where(u => u.Id != currentViewerId && u.Id != "8e445865-a24d-4543-a6c6-9443d048cdb0");
 
 
             var search = "";
@@ -151,20 +151,18 @@ namespace ThreadsApp.Controllers
                     db.Comments.Remove(comment);
                 }
             }
-
-            if (user.Posts.Count > 0)
-            {
-                foreach (var post in user.Posts)
-                {
-                    db.Posts.Remove(post);
-                }
-            }
-
             if (user.Reposts.Count > 0)
             {
                 foreach (var repost in user.Reposts)
                 {
                     db.Reposts.Remove(repost);
+                }
+            }
+            if (user.Posts.Count > 0)
+            {
+                foreach (var post in user.Posts)
+                {
+                    db.Posts.Remove(post);
                 }
             }
             if (user.Groups.Count > 0)
@@ -178,14 +176,17 @@ namespace ThreadsApp.Controllers
             {
                 foreach (var usergroup in user.UserGroups)
                 {
-                    // Check if the user is the last user in the group 
                     var groupId = usergroup.GroupId;
-                    var remainingUsersInGroup = db.UserGroups.Count(ug => ug.GroupId == groupId);
-
-                    if (remainingUsersInGroup == 1)
+                    var lastMember = !db.UserGroups.Any(ug => ug.GroupId == groupId && ug.UserId != user.Id);
+                    Group group = db.Groups.Find(groupId);
+                    if (lastMember)
                     {
-                        Group group = db.Groups.Find(groupId);
+                       
                         db.Groups.Remove(group);
+                    }
+                    else
+                    {
+                        group.MemberCount -= 1;
                     }
                     db.UserGroups.Remove(usergroup);
                 }
