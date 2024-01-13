@@ -14,7 +14,8 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .pagination > li > a {
@@ -42,4 +43,10 @@ body {
 .nav-pills .nav-link.active {
     color: white !important;
     background-color: black !important;
+}
+.custom-bold {
+    font-weight: 600;
+}
+.custom-navbar {
+    height: 75px; 
 }
