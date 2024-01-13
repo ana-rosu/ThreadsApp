@@ -30,21 +30,35 @@ namespace ThreadsApp.Controllers
         {
             int _perpage = 5;
             
-            var posts = db.Posts.Include("User").Include("Comments").Include("Comments.User").Include("PostReposts").Include("Likes")
+            var posts = db.Posts.Include("User").Include("Comments").Include("Comments.User").Include("Likes")
                                 .Where(p => p.GroupId == null)
                                 .OrderByDescending(p => p.Date)
                                 .ToList();
+
+            var reposts = db.Reposts.Include("User")
+                                    .Include("Post")
+                                    .Include("Post.User")
+                                    .Include("Post.Comments")
+                                    .Include("Post.Comments.User")
+                                    .Include("Post.Likes")
+                                    .OrderByDescending(r => r.Post.Date);
+
+            var feed = new List<object>();
+
+            feed.AddRange(posts);
+            feed.AddRange(reposts);
+
+            feed = feed.OrderByDescending(item => (item is Post post) ? post.Date : ((Repost)item).Date).ToList();
 
             SetAccessRights();
 
             foreach (var post in posts)
             {
-                ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));
+                    ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));
             }
 
 
-            ViewBag.Posts = posts;
-
+            ViewBag.Feed = feed;
 
             if (TempData.ContainsKey("message"))
             {
@@ -52,7 +66,7 @@ namespace ThreadsApp.Controllers
                 ViewBag.Alert = TempData["messageType"];
             }
 
-            int totalItems = posts.Count();
+            int totalItems = feed.Count();
 
             var currentPage = page ?? Convert.ToInt32(HttpContext.Request.Query["page"]);
 
@@ -63,11 +77,12 @@ namespace ThreadsApp.Controllers
                 offset = (currentPage - 1) * _perpage;
             }
 
-            var paginatedPosts = posts.Skip(offset).Take(_perpage);
+            var paginatedFeed = feed.Skip(offset).Take(_perpage);
 
             ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perpage);
 
-            ViewBag.Posts = paginatedPosts;
+            ViewBag.Feed = paginatedFeed;
+
             ViewData["CurrentPage"] = currentPage;
 
             return View();
@@ -145,7 +160,7 @@ namespace ThreadsApp.Controllers
         {
             Post post = db.Posts.Include("Comments")
                                 .Include("Likes")
-                                .Include("PostReposts")
+                                .Include("Reposts")
                                 .Where(p => p.Id == id)
                                 .First();
 

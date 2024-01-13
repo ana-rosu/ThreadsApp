@@ -20,10 +20,9 @@ namespace ThreadsApp.Models
         public int? GroupId { get; set; }
         public virtual Group? Group { get; set; }
 
-        public virtual ICollection<PostRepost>? PostReposts { get; set; }
+        public virtual ICollection<Repost>? Reposts { get; set; }
         public virtual ICollection<Like>? Likes { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; }
-        public int? LikesCount { get; set; }
 
     }
 }

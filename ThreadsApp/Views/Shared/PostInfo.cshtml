@@ -1,62 +1,182 @@
 ﻿@model dynamic
 @using ThreadsApp.Extensions
 
-<div class="card-body">
-     
-    <div class="d-flex justify-content-between flex-row">
-       
-        <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
-        <div class="d-flex align-items-center">
-        @if (Model.IsAdmin || Model.Post.UserId == Model.UserCurent)
-        {
+@if (Model.Post is ThreadsApp.Models.Repost repost)
+{
+    <div class="card-body">
 
-            <a class="btn" href="/Posts/Edit/@Model.Post.Id"><i class="bi bi-pencil"></i></a>
+        <div class="d-flex justify-content-between flex-row">
 
-            <form method="post" action="/Posts/Delete/@Model.Post.Id">
+            <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+            <div class="d-flex align-items-center">
+                @if (Model.IsAdmin || Model.Post.Post.UserId == Model.UserCurent)
+                {
 
-                <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
-            
-            </form>
-            
-        }
+                    <a class="btn" href="/Posts/Edit/@Model.Post.Post.Id"><i class="bi bi-pencil"></i></a>
+
+                    <form method="post" action="/Posts/Delete/@Model.Post.Post.Id">
+
+                        <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
+
+                    </form>
+                }
+            </div>
         </div>
-    </div>
 
-    <hr class="hr" />
-    
-    <p class="card-text">@Model.Post.Content</p>
+        <hr class="hr" />
 
-    <div class="d-flex justify-content-between flex-row">
-    
-        <div class="d-flex align-items-center">
-
-            <span>@Model.Post.Likes?.Count</span>
-
-            <form method="post" asp-action="Like" asp-controller="Posts">
-
-                <input type="hidden" name="postId" value="@Model.Post.Id" />
-                <input type="hidden" name="currentPage" value="@ViewBag.currentPage" />
-
-                @if (ViewData[$"UserLiked_{Model.Post.Id}"] as bool? ?? false == true)
-                {
-                    <button type="submit" class="btn">
-                        <i class="bi bi-heart-fill" style="color:red;"></i>
-                    </button>
-
-                    <input type="hidden" />
-                }
-                else
-                {
-                    <button type="submit" class="btn">
-                        <i class="bi bi-heart"></i>
-                    </button>
-                }
-            </form>
+        <p class="card-text">@Model.Post.Content</p>
         
-         </div>
+        <br />
 
-        <span>@Html.RelativeDate((DateTime)Model.Post.Date)</span>
-    
+        <!-- Reposted Post Content -->
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between flex-row">
+
+                    <div><i class="bi bi-person"></i>@Model.Post.Post.User.UserName</div>
+                    <div class="d-flex align-items-center">
+                        @if (Model.IsAdmin || Model.Post.Post.UserId == Model.UserCurent)
+                        {
+
+                            <a class="btn" href="/Posts/Edit/@Model.Post.Post.Id"><i class="bi bi-pencil"></i></a>
+
+                            <form method="post" action="/Posts/Delete/@Model.Post.Post.Id">
+
+                                <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
+
+                            </form>
+                        }
+                    </div>
+                </div>
+
+                <hr class="hr" />
+
+                <p class="card-text">@Model.Post.Post.Content</p>
+
+                <div class="d-flex justify-content-between flex-row">
+
+                    <div class="d-flex align-items-center">
+
+                        <span>@(Model.Post.Post.Likes?.Count ?? 0)</span>
+
+                        <form method="post" asp-action="Like" asp-controller="Posts">
+
+                            <input type="hidden" name="postId" value="@Model.Post.Post.Id" />
+                            <input type="hidden" name="currentPage" value="@ViewBag.currentPage" />
+
+                            @if (ViewData[$"UserLiked_{Model.Post.Post.Id}"] as bool? ?? false)
+                            {
+                                <button type="submit" class="btn">
+                                    <i class="bi bi-heart-fill" style="color:red;"></i>
+                                </button>
+
+                                <input type="hidden" />
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            }
+                        </form>
+
+                    </div>
+
+                    <span>@Html.RelativeDate((DateTime)Model.Post.Post.Date)</span>
+
+                </div>
+
+            </div>
+            @{
+                var combinedData = new
+                {
+                    Post = Model.Post.Post,
+                    UserCurent = ViewBag.UserCurent,
+                    IsAdmin = ViewBag.IsAdmin
+                };
+            }
+
+            @Html.Partial("PostModal", combinedData)
+        </div>
+
+        
+
+        <!-- end of reposted post -->
+
+        <br />
+
+        <div class="d-flex justify-content-end flex-row">
+
+            <span>@Html.RelativeDate((DateTime)Model.Post.Date)</span>
+
+        </div>
+
+        </div>
+}
+
+else if (Model.Post is ThreadsApp.Models.Post post)
+{
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between flex-row">
+
+            <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+            <div class="d-flex align-items-center">
+                @if (Model.IsAdmin || Model.Post.UserId == Model.UserCurent)
+                {
+
+                    <a class="btn" href="/Posts/Edit/@Model.Post.Id"><i class="bi bi-pencil"></i></a>
+
+                    <form method="post" action="/Posts/Delete/@Model.Post.Id">
+
+                        <button type="submit" class="btn"><i class="bi bi-trash"></i></button>
+
+                    </form>
+                }
+            </div>
+        </div>
+
+        <hr class="hr" />
+
+        <p class="card-text">@Model.Post.Content</p>
+
+        <div class="d-flex justify-content-between flex-row">
+
+            <div class="d-flex align-items-center">
+
+                <span>@Model.Post.Likes?.Count</span>
+
+                <form method="post" asp-action="Like" asp-controller="Posts">
+
+                    <input type="hidden" name="postId" value="@Model.Post.Id" />
+                    <input type="hidden" name="currentPage" value="@ViewBag.currentPage" />
+
+                    @if (ViewData[$"UserLiked_{Model.Post.Id}"] as bool? ?? false)
+                    {
+                        <button type="submit" class="btn">
+                            <i class="bi bi-heart-fill" style="color:red;"></i>
+                        </button>
+
+                        <input type="hidden" />
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    }
+                </form>
+
+                @Html.Partial("RepostModal", (ThreadsApp.Models.Post)Model.Post)
+
+            </div>
+
+            <span>@Html.RelativeDate((DateTime)Model.Post.Date)</span>
+
+        </div>
+
     </div>
-
-</div>
+}

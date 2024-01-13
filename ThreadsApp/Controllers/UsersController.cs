@@ -46,13 +46,6 @@ namespace ThreadsApp.Controllers
                              ? "/images/profile/default.png"
                              : user.ProfilePicture;
 
-            if (user.Posts != null)
-            {
-                foreach (var post in user.Posts)
-                {
-                    post.LikesCount = post.Likes?.Count ?? 0;
-                }
-            }
     
             string requestStatus = db.Follows
                                    .Where(f => f.FollowerId == _userManager.GetUserId(User) && f.FollowingId == id)

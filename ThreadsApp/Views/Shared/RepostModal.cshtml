@@ -1,0 +1,41 @@
+﻿@model ThreadsApp.Models.Post
+<button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#RepostModal_@Model.Id">
+    <i class="bi bi-repeat"></i>
+</button>
+
+<div class="modal fade" tabindex="-1" aria-labelledby="repostModalLabel" id="RepostModal_@Model.Id" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title fs-6" id="repostModalLabel">Repost</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form method="post" action="/Reposts/New">
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    <input type="hidden" name="page" value="@ViewData["CurrentPage"]" />
+                        
+                    <div class="card">
+                            
+                        <div class="card-body">
+                           
+                            <label class="fs-6">Repost Content:</label>
+                            <br />
+                        
+                            <textarea class="form-control" name="Content" rows="3"></textarea>
+                            @Html.ValidationMessageFor(model => model.Content, null, new { @class = "text-danger" })
+                            
+                            <br /><br />
+             
+                            <button type="submit" class="btn btn-outline-dark">Repost</button>
+                    
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -12,13 +12,12 @@
 }
 
 <br />
-
-@foreach (ThreadsApp.Models.Post post in ViewBag.Posts)
+@foreach (var item in ViewBag.Feed)
 {
     
     var combinedData = new
     {
-        Post = post,
+        Post = item,
         UserCurent = ViewBag.UserCurent,
         IsAdmin = ViewBag.IsAdmin
     };
@@ -27,16 +26,17 @@
 
         @Html.Partial("PostInfo", combinedData)
 
-        @Html.Partial("PostModal", combinedData)
+        @if (item is Post post)
+        {
+            @Html.Partial("PostModal", combinedData)
+        }
 
-                
      </div>
         
 
     <br />
     <br />
 }
-
 
 <div>
 
