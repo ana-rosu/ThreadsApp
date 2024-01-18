@@ -41,6 +41,10 @@ namespace ThreadsApp.Controllers
                                            .Include("Followings")
                                            .Where(u => u.Id == id)
                                            .FirstOrDefault();
+            if(user.AccountPrivacy == null)
+            {
+                user.AccountPrivacy = "Public";
+            }
             if (user.Image == null)
             {
                 user.ProfilePicture ??= "/images/profile/default.png";
@@ -63,7 +67,8 @@ namespace ThreadsApp.Controllers
             ViewBag.FollowingCount = followingCount;
             ViewBag.FollowersCount = followersCount;
             ViewBag.CurrentUser = _userManager.GetUserId(User);
-            ViewBag.Posts = user.Posts;
+            ViewBag.Posts = user.Posts.Where(post => post.GroupId == null).ToList();
+            //ViewBag.Reposts = user.Reposts.Where(repost => repost.GroupId == null).ToList(); // TO DO: add GroupId & Group nav property in Repost.cs model
             ViewBag.Reposts = user.Reposts;
             ViewBag.IsAdmin = User.IsInRole("Admin");
             SetViewRights(id);
@@ -133,17 +138,28 @@ namespace ThreadsApp.Controllers
         public IActionResult Delete(string id)
         {
             var user = db.Users
-                         .Include("Posts")
-                         .Include("Reposts")
-                         .Include("Comments")
-                         .Include("Groups")
-                         .Include("UserGroups")
-                         .Include("Followers")
-                         .Include("Followings")
-                         .Include("Likes")
-                         .Where(u => u.Id == id)
-                         .First();
-
+                        .Include(u => u.Posts)
+                            .ThenInclude(p => p.Likes)
+                        .Include(u => u.Posts)
+                            .ThenInclude(p => p.Reposts)
+                        .Include(u => u.Posts)
+                            .ThenInclude(p => p.Comments)
+                        .Include(u => u.Comments)
+                        .Include(u => u.Followers)
+                        .Include(u => u.Followings)
+                        .Include(u => u.Likes)
+                        .Include(u => u.Reposts)
+                        .Include(u => u.Groups)
+                            .ThenInclude(g => g.UserGroups)
+                        .Where(u => u.Id == id)
+                        .FirstOrDefault();
+            if (user.Likes.Count > 0)
+            {
+                foreach (var like in user.Likes)
+                {
+                    db.Likes.Remove(like);
+                }
+            }
             if (user.Comments.Count > 0)
             {
                 foreach (var comment in user.Comments)
@@ -162,6 +178,22 @@ namespace ThreadsApp.Controllers
             {
                 foreach (var post in user.Posts)
                 {
+                    post.Group = null; 
+                    foreach (var like in post.Likes)
+                    {
+                        db.Likes.Remove(like);
+                    }
+
+                    foreach (var repost in post.Reposts)
+                    {
+                        db.Reposts.Remove(repost);
+                    }
+
+                    foreach (var comment in post.Comments)
+                    {
+                        db.Comments.Remove(comment);
+                    }
+
                     db.Posts.Remove(post);
                 }
             }
@@ -169,16 +201,25 @@ namespace ThreadsApp.Controllers
             {
                 foreach (var group in user.Groups)
                 {
+                    foreach (var post in group.Posts)
+                    {
+                        db.Posts.Remove(post);
+                    }
+                    foreach (var post in group.Posts)
+                    {
+                        db.Posts.Remove(post);
+                    }
                     db.Groups.Remove(group);
                 }
             }
-            if (user.UserGroups.Count > 0)
+            if (user.UserGroups?.Count > 0)
             {
                 foreach (var usergroup in user.UserGroups)
                 {
                     var groupId = usergroup.GroupId;
                     var lastMember = !db.UserGroups.Any(ug => ug.GroupId == groupId && ug.UserId != user.Id);
                     Group group = db.Groups.Find(groupId);
+                    
                     if (lastMember)
                     {
                        
@@ -205,13 +246,7 @@ namespace ThreadsApp.Controllers
                     db.Follows.Remove(following);
                 }
             }
-            if (user.Likes.Count > 0)
-            {
-                foreach (var like in user.Likes)
-                {
-                    db.Likes.Remove(like);
-                }
-            }
+
             db.Users.Remove(user);
 
             db.SaveChanges();

@@ -6,8 +6,9 @@
     <div class="card-body">
 
         <div class="d-flex justify-content-between flex-row">
-
-            <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+            <a href="/Users/ShowProfile/@Model.Post.UserId" style="text-decoration:none; color:black;">
+                <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+            </a>
             <div class="d-flex align-items-center">
                 @if (Model.IsAdmin || Model.Post.Post.UserId == Model.UserCurent)
                 {
@@ -36,8 +37,9 @@
             <div class="card-body">
 
                 <div class="d-flex justify-content-between flex-row">
-
-                    <div><i class="bi bi-person"></i>@Model.Post.Post.User.UserName</div>
+                    <a href="/Users/ShowProfile/@Model.Post.UserId" style="text-decoration:none; color:black;">
+                        <div><i class="bi bi-person"></i>@Model.Post.Post.User.UserName</div>
+                    </a>
                     <div class="d-flex align-items-center">
                         @if (Model.IsAdmin || Model.Post.Post.UserId == Model.UserCurent)
                         {
@@ -131,8 +133,9 @@ else if (Model.Post is ThreadsApp.Models.Post post)
     <div class="card-body">
 
         <div class="d-flex justify-content-between flex-row">
-
-            <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+            <a href="/Users/ShowProfile/@Model.Post.UserId" style="text-decoration:none; color:black;">
+                <div><i class="bi bi-person"></i>@Model.Post.User.UserName</div>
+            </a>
             <div class="d-flex align-items-center">
                 @if (Model.IsAdmin || Model.Post.UserId == Model.UserCurent)
                 {

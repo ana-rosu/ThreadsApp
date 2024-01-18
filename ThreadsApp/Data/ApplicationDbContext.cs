@@ -78,11 +78,18 @@ namespace ThreadsApp.Data
                         .WithMany(p => p.Comments)
                         .HasForeignKey(c => c.PostId)
                         .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Repost>()
                         .HasOne(r => r.Post)
                         .WithMany(p => p.Reposts)
                         .HasForeignKey(r => r.PostId)
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict); // when a repost is deleted, delete only the repost itself
+
+            modelBuilder.Entity<Post>()
+                        .HasMany(p => p.Reposts)
+                        .WithOne(r => r.Post)
+                        .HasForeignKey(r => r.PostId)
+                        .OnDelete(DeleteBehavior.Cascade); // when a post is deleted, delete all its reposts
         }
 
 

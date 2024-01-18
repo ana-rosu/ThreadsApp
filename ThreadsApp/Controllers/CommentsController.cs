@@ -25,6 +25,7 @@ namespace ThreadsApp.Controllers
         
         // adding a comment associated to a post in db
         [HttpPost]
+        [Authorize(Roles = "User")]
         public IActionResult New (Comment comm, int? Page)
         {
             comm.Date = DateTime.Now;
@@ -77,7 +78,7 @@ namespace ThreadsApp.Controllers
         }
 
         // displaying the form to edit a comment 
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult Edit(int id)
         {
             Comment comm = _db.Comments.Find(id);
@@ -97,7 +98,7 @@ namespace ThreadsApp.Controllers
         }
         // processing the form submission by saving the edits of the comment in db
         [HttpPost]
-        [Authorize(Roles = "User,Admin")]
+        [Authorize(Roles = "User")]
         public IActionResult Edit(int id, int? Page, Comment requestComment)
         {
             Comment comm = _db.Comments.Find(id);

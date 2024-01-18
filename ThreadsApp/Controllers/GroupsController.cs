@@ -67,6 +67,8 @@ namespace ThreadsApp.Controllers
             .FirstOrDefault();
 
 
+            group.Posts = group.Posts.OrderByDescending(p => p.Date).ToList();
+           
             foreach (var post in group.Posts)
             {
                 ViewData[$"UserLiked_{post.Id}"] = post.Likes.Any(l => l.UserId == _userManager.GetUserId(User));

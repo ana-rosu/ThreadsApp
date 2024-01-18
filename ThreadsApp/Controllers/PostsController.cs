@@ -123,7 +123,7 @@ namespace ThreadsApp.Controllers
             
             if (ModelState.IsValid)
             {
-                post.ImagePath ??= "/images/profile/default.png";
+               
                 if (post.Image != null )
                 {
                     var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts", post.Image.FileName);
@@ -214,8 +214,6 @@ namespace ThreadsApp.Controllers
             {
                 if (post.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
                 {
-                    requestPost.ImagePath ??= "/images/profile/default.png";
-
                     if (requestPost.Image != null)
                     {
                         var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "posts", requestPost.Image.FileName);
